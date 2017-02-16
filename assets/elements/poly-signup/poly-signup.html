@@ -1,0 +1,128 @@
+<dom-module id="poly-signup">
+    <template>
+        <style>
+            #signup {
+                display: block;
+
+                max-height: 100vh;
+                /* Keep overflow visible so vaadin-date-picker dropdown won't clip */
+                overflow: visible;
+            }
+
+            #signup {
+
+                overflow-y: scroll;
+            }
+
+        </style>
+        <paper-button data-dialog="signup" raised>Sign Up</paper-button>
+
+        <paper-dialog id="signup" role="dialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation"
+                      with-backdrop>
+            <h2>Sign Up</h2>
+            <paper-dialog-scrollable>
+                <paper-input name="name" value="{{user.name}}" error-message="we need your name" required label="Name">
+                    <iron-icon icon="face" prefix></iron-icon>
+                </paper-input>
+                <!--paper-input name="username" value="{{user.username}}" error-message="username should be from 6 to 20 characters" type="text"  required minlength="6" maxlength="20" label="Username">
+                  <iron-icon icon="myicons:phone" prefix></iron-icon>
+                </paper-input-->
+
+                <paper-input name="email" value="{{user.email}}" error-message="invalid email address" type="email"
+                             required label="Email">
+                    <iron-icon icon="icons:drafts" prefix></iron-icon>
+                </paper-input>
+                <paper-input name="password" value="{{user.password}}"
+                             error-message="password should be from 6 to 20 characters" required minlength="6"
+                             maxlength="20" type="password" label="Password">
+                    <iron-icon icon="icons:https" prefix></iron-icon>
+                </paper-input>
+
+                <vaadin-combo-box
+                        label="School"
+                        required
+                        items='["Administración", "Contabilidad",   "Economía", "Ingeniería de Sistemas", "Ingeniería Industrial", "Ingeniería Electrónica", "Ingeniería Civil", "Arquitectura"]'
+                        value="{{user.school}}">
+                    <iron-icon icon="myicons:school" prefix></iron-icon>
+
+                </vaadin-combo-box>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button on-click="signup">Sign Up</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+    <script>
+        Polymer({
+            is: 'poly-signup',
+
+            properties: {
+                user: {
+                    type: Object,
+                    value: {}
+                }
+            },
+
+            signup: function () {
+
+                var inputs = this.querySelectorAll('input'),
+                    inputs_length = inputs.length,
+                    is_valid = false;
+
+                for (var i = 0; i < inputs_length; i++) {
+                    is_valid = inputs[i].validate();
+                    inputs[i].focus();
+                }
+
+                Parse.initialize("864978ada6235f558ec04dd5e3200e07c6bb1553");
+                Parse.serverURL = 'http://52.225.216.48:80/parse';
+
+                //var currentUser = Parse.User.current();
+                //currentUser.logOut();
+
+                if (is_valid) {
+                    Parse.User.logOut().then(function () {
+                        console.log(Parse.User.current());
+                    }, function (error) {
+                        console.log(error);
+                    });
+                    QB.init(QBApp.appId, QBApp.authKey, QBApp.authSecret);
+
+                    QB.createSession(function(err,result){
+                        console.log('Session create callback', err, result);
+                    });
+
+                    var newuser = new Parse.User();
+                    newuser.set("name", this.user.name);
+                    newuser.set("email", this.user.email);
+
+                    newuser.set("username", this.user.email);
+                    newuser.set("password", this.user.password);
+
+                    newuser.set("school", this.user.school);
+
+                    var params = { 'login': this.user.email, 'password': this.user.password, 'custom_data': this.user.school};
+
+                    newuser.signUp(null, {
+                        success: function (res) {
+                            QB.users.create(params, function(err, user){
+                                if (user) {
+                                    // Hooray! Let them use the app now.
+                                    sessionStorage.setItem('id', res.id);
+                                    sessionStorage.setItem('token', res.getSessionToken());
+                                    window.location = 'home.html';
+                                 } else  {
+                                    log.console("Error: " + error.code + " " + error.message);
+                                }
+                            });
+                        },
+                        error: function (user, error) {
+                            // Show the error message somewhere and let the user try again.
+                            log.console("Error: " + error.code + " " + error.message);
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</dom-module>

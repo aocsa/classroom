@@ -1,0 +1,42 @@
+<dom-module is="poly-profile">
+  <template>
+
+    <poly-gravatar logout user$="{{user}}"></poly-gravatar>
+
+    <paper-ripple></paper-ripple>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'poly-profile',
+      properties: {
+        user: {
+          type: Object,
+          value: {}
+        }
+      },
+      ready: function(){
+        Parse.initialize("864978ada6235f558ec04dd5e3200e07c6bb1553");
+        Parse.serverURL = 'http://52.225.216.48:80/parse';
+        var GameScore = Parse.Object.extend("User");
+        var query = new Parse.Query(GameScore);
+        query.equalTo("objectId",  sessionStorage.getItem('id') );
+        query.find({
+          success: function(results) {
+            if (results.length == 1 ) {
+              this.user = request.detail.response;
+              window.app.user = request.detail.response;
+            }
+            else {
+             // window.location = "../";
+            }
+          },
+          error: function(error) {
+            // window.location = "../";
+          }
+        });
+
+      }
+    });
+  </script>
+</dom-module>

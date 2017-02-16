@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Polymer Starter Kit">
+
+    <!-- Chrome for Android theme color -->
+    <meta name="theme-color" content="#2E3AA1">
+
+    <!-- Web Application Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Tile color for Win8 -->
+    <meta name="msapplication-TileColor" content="#3372DF">
+
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="PSK">
+    <link rel="icon" sizes="192x192" href="images/touch/chrome-touch-icon-192x192.png">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Polymer Starter Kit">
+    <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png">
+
+    <!-- Tile icon for Win8 (144x144) -->
+    <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+
+    <title>P O L Y</title>
+
+    <link rel="stylesheet" is="custom-style" href="assets/dist/css/main.min.css">
+
+    <script src="assets/js/config.js"></script>
+
+
+    <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <!-- endbuild -->
+
+    <script src="bower_components/parse/parse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quickblox/2.5.0/quickblox.min.js"></script>
+
+
+
+    <link rel="stylesheet" is="custom-style"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" is="custom-style" href="bower_components/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" is="custom-style" href="bower_components/bootstrap-social/bootstrap-social.css">
+
+
+
+    <script>
+        var googleUser = {};
+        var startApp = function () {
+            gapi.load('auth2', function () {
+                // Retrieve the singleton for the GoogleAuth library and set up the client.
+                auth2 = gapi.auth2.init({
+                    client_id: '549624147622-qo2sbncpb3t8ui9fcda07kt3r5dim765.apps.googleusercontent.com',
+                    cookiepolicy: 'single_host_origin',
+                    // Request scopes in addition to 'profile' and 'email'
+                    //scope: 'additional_scope'
+                });
+                attachSignin(document.getElementById('googleBnt'));
+            });
+        };
+        function attachSignin(element) {
+            console.log(element.id);
+            auth2.attachClickHandler(element, {},
+                function (googleUser) {
+                    document.getElementById('name').innerText = "Signed in: " + googleUser.getBasicProfile().getName();
+                }, function (error) {
+                    alert(JSON.stringify(error, undefined, 2));
+                });
+        }
+    </script>
+
+
+    <!-- Importing the elements file -->
+    <link rel="import" href="elements.html">
+
+</head>
+<body unresolved>
+<div id="container">
+    <div class="layout vertical content">
+        <div class="flex">
+            <iron-image src="assets/img/logo_white_full.svg"></iron-image>
+        </div>
+
+        <div class="flex-10 layout vertical center center-justified">
+            <p class="big_text">Eight days a week</p>
+
+            <div class="vertical layout">
+                <div class="flex-1" id="facebookBnt">
+                    <a class="btn btn-block btn-social btn-facebook center">
+                        <span class="fa fa-facebook"></span> Sign in with Facebook
+                    </a>
+                    <p></p>
+                </div>
+
+
+                <div class="flex-4" id="googleBnt">
+                    <a class="btn btn-block btn-social btn-google">
+                        <span class="fa fa-google"></span> Sign in with Google
+                    </a>
+                </div>
+            </div>
+
+
+            <div onclick="app.helpers.clickHandler(event)">
+                <poly-login></poly-login>
+                <poly-signup></poly-signup>
+            </div>
+        </div>
+        <div class="flex layout vertical end-justified footer">
+            <p>Experimental project</p>
+        </div>
+    </div>
+</div>
+<script>
+    startApp();
+
+    Parse.initialize("864978ada6235f558ec04dd5e3200e07c6bb1553");
+    Parse.serverURL = 'http://52.225.216.48:80/parse';
+    // Load the SDK asynchronously
+    window.fbAsyncInit = function () {
+        Parse.FacebookUtils.init({ // this line replaces FB.init({
+            appId: '1070001599751830', // Facebook App ID
+            status: true,  // check Facebook Login status
+            cookie: true,
+            xfbml: true,  // initialize Facebook social plugins on the page
+            version: 'v2.2' // point to the latest Facebook Graph API version
+        });
+
+        // Run code after the Facebook SDK is loaded.
+    };
+
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {
+            return;
+        }
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+
+    $("#facebookBnt").click(function () {
+        Parse.FacebookUtils.logIn(null, {
+            success: function (user) {
+
+                sessionStorage.setItem('id', user.id);
+                sessionStorage.setItem('token', user.getSessionToken());
+                window.location = '/studychat/home.html';
+            },
+            error: function (user, error) {
+                alert("User cancelled the Facebook login or did not fully authorize.");
+            }
+        });
+    });
+
+
+</script>
+<script >
+
+    var App = function(){
+        this.is_mobile = false;
+        this.init = function(){
+            if(location.pathname == "/" && sessionStorage.getItem('token')) {
+                location.href = "makesomenoice";
+            }
+        };
+        this.helpers = {
+            clickHandler: function(e){
+                var button = e.target;
+                while (!button.hasAttribute('data-dialog') && button !== document.body) {
+                    button = button.parentElement;
+                }
+
+                if (!button.hasAttribute('data-dialog')) {
+                    return;
+                }
+
+                var id = button.getAttribute('data-dialog');
+                var dialog = document.getElementById(id);
+                if (dialog) {
+
+                    dialog.open();
+                }
+            }
+        };
+        this.artists = [];
+        this.song = {};
+        this.current_playlist = [];
+        this.songIndex = 0;
+
+    };
+    var app = new App();
+    app.init();
+
+</script>
+
+</body>
+</html>

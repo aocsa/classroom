@@ -1,0 +1,35 @@
+<dom-module id="poly-user-music">
+  <template>
+    <paper-spinner active$="{{spinnerShow}}"></paper-spinner>
+    <h2>My Music</h2>
+    <iron-ajax id="ajax" url="" handle-as="json" on-response="handleResponse"></iron-ajax>
+    <poly-songs class="with-artist" songs$="{{songs}}"></poly-songs>
+  </template>
+  <script>
+    Polymer({
+      is: 'poly-user-music',
+      properties: {
+        spinnerShow: {
+          type: Boolean,
+          value: true
+        }
+      },
+      ready: function(){
+        this.songs = [];
+        window.app.umusic = this;
+
+        this.updateList();
+      },
+      handleResponse: function(res){
+        this.songs = res.detail.response[0].songs;
+        window.app.user_music = this.songs;
+        this.spinnerShow = false;
+      },
+      updateList: function(){
+          this.$.ajax.url = "assets/songs.json";
+
+          this.$.ajax.generateRequest();
+      }
+    });
+  </script>
+</dom-module>
