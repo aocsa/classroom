@@ -110,6 +110,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <iron-icon icon="info"></iron-icon>
                     <span>Users</span>
                 </a>
+                
+                <a data-route="received" href="{{baseUrl}}received">
+                    <iron-icon icon="mail"></iron-icon>
+                    <span>Received</span>
+                </a>
 
                 <a data-route="contact" href="{{baseUrl}}contact">
                     <iron-icon icon="mail"></iron-icon>
@@ -173,6 +178,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <paper-material elevation="-1">
                             <h1 class="page-title" tabindex="-1">User: {{params.name}}</h1>
                             <div>This is {{params.name}}'s section</div>
+                        </paper-material>
+                    </section>
+
+                    <section data-route="received" tabindex="-1">
+                        <paper-material elevation="1">
+                            <h1 class="page-title" tabindex="-1">Received</h1>
+                            <p>This is the received section</p>
                         </paper-material>
                     </section>
 

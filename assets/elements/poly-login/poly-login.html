@@ -75,6 +75,8 @@
                              //   if (user) {
                                     // Do stuff after successful login.
                                     sessionStorage.setItem('id', res.id);
+                                    var school = res.attributes.school;
+                                    sessionStorage.setItem('school', school);
                                     sessionStorage.setItem('token', res.getSessionToken());
                                     window.location = '/';
                              //   } else {

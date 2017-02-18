@@ -164,13 +164,11 @@
                 <div class="form">
                     <form is="iron-form" id="form">
                         <iron-a11y-keys keys="enter" on-keys-pressed="_save"></iron-a11y-keys>
-                        <vaadin-combo-box name="merchant" id="merchant" items="[[merchants]]" value="{{expense.merchant}}" label="Merchant" allow-custom-value required></vaadin-combo-box>
-                        <paper-input name="total" id="total" value="{{expense.total}}" type="number" max="10000" label="Total" required step="any">
-                            <div prefix>$</div>
-                        </paper-input>
+                        <vaadin-combo-box name="merchant" id="merchant" items="[[merchants]]" value="{{expense.title}}" label="Title" allow-custom-value required></vaadin-combo-box>
+                        
 
-                        <vaadin-date-picker label="Date" value="{{expense.date}}" id="date" name="date" required></vaadin-date-picker>
-                        <paper-textarea id="comment" name="comment" label="Comment" value="{{expense.comment}}"></paper-textarea>
+                        <vaadin-date-picker label="Deadline" value="{{expense.deadline}}" id="date" name="date" required></vaadin-date-picker>
+                        <paper-textarea id="comment" name="comment" label="Description" value="{{expense.description}}"></paper-textarea>
                     </form>
                 </div>
                 <div class="receipt">
@@ -229,8 +227,6 @@
                 ready: function() {
                     this.$.upload.set('i18n.dropFiles.one', 'Drop receipt here...');
                     this.$.upload.set('i18n.addFiles.one', 'Select receipt');
-
-
                 },
 
                 attached: function() {
@@ -252,9 +248,9 @@
 
                 _getCaption: function(expense) {
                     if (expense._id) {
-                        return 'Edit Expense';
+                        return 'Edit Homework';
                     } else {
-                        return 'Add Expense';
+                        return 'Add Homework';
                     }
                 },
 
@@ -348,44 +344,40 @@
                     this.$.upload.files = [];
                     e.preventDefault();
                 },
-
                 _save: function() {
                     this.$.error.innerText = '';
                     var form = this.$.form;
                     if (form.validate()) {
-                        this.expense.total = parseFloat(this.expense.total);
-
+                        //this.expense.total = parseFloat(this.expense.total);
                         this._saveExpense(this.expense);
 
-                        console.log("Form Valido!! " + this.expense.merchant);
+                        console.log("Form Valido!! ");//_saveExpense aun no termina al llamarse esta linea
                     }
                     else{
-                        console.log("Form NO valido " + this.expense._attachments.receipt.data );
+                        console.log("Form NO valido ");
                     }
                 },
-
                 _saveExpense: function(expense) {
-
                     //this._db.save(expense);
                     //this.fire('expenses-updated');
 
                     // PARSE YA ESTA INICIALIZADO EN POLY-PROFILE
-
-                    var TableExpense = Parse.Object.extend("Expense");
+                    var TableExpense = Parse.Object.extend("Homework");
                     var tableExpense = new TableExpense();
 
                     // crud:update code
                     var localObj = JSON.parse(localStorage.getItem("expense")); // recover item from table list
-                    if(localObj){//Si es que ya existe un id , se actualiza
+                    var is_update = false;
+                    if(localObj._id){//Si es que ya existe un id , se actualiza
                         tableExpense.set("objectId",localObj._id);
+                        is_update = true;
                     }
                     //
 
-                    tableExpense.set("user_ID", sessionStorage.getItem('id'));
-                    tableExpense.set("Merchant", expense.merchant);
-                    tableExpense.set("Total", expense.total);
-                    tableExpense.set("Date", expense.date);
-                    tableExpense.set("Comment", expense.comment);
+                    tableExpense.set("title", expense.title);
+                    tableExpense.set("deadline", expense.deadline);
+                    tableExpense.set("description", expense.description);
+                    tableExpense.set("userid", sessionStorage.getItem('id'));
 
                     //Guardar archivo/imagen en Parse
                     if (expense._attachments && expense._attachments.receipt) {
@@ -399,31 +391,68 @@
                             // The file either could not be read, or could not be saved to Parse.
                             console.log('error parseFile');
                         });
-                        tableExpense.set("documentFile", parseFile);
+                        tableExpense.set("attachment", parseFile);
                     }
-
+                    
                     tableExpense.save(null, {
                         success: function(tableExpense) {
                             // Execute any logic that should take place after the object is saved.
-                            app.$.toast.text = 'New object created with objectId: ' + tableExpense.id;
+                            //app.$.toast.text = 'New object created with objectId: ' + tableExpense.id;
+                            app.$.toast.text ='New Homework created!!';
                             app.$.toast.show();
-
-
-                            dialog.close();
-
-                            page('/');
-                            _this.expense = {};
-
+                            
+                            console.log('New object created with objectId: ' + tableExpense.id + 'is_update: '+ is_update);
+                            if(is_update){
+                                dialog.close();
+                                page('/');
+                            }else{
+                                //School_User esta en sessionStorage.getItem('school')
+                                //Sacaremos todos los usuarios que sean profesores y que tengan la misma escuela que el usuario_current
+                                var TableUser = Parse.Object.extend("User");
+                                var query = new Parse.Query(TableUser);
+                                query.equalTo("user_type", 'Profesor');
+                                query.equalTo("school", sessionStorage.getItem('school'));
+                                query.find({
+                                    success: function(results) {
+                                        console.log("Successfully retrieved " + results.length + " scores.");
+                                        //SAVE TABLE Message
+                                        for (var i = 0; i < results.length; i++) {
+                                            var object = results[i];
+                                            var TableMessage = Parse.Object.extend("Message ");
+                                            var tableMessage = new TableMessage();
+                                            tableMessage.set("idsender", sessionStorage.getItem('id'));
+                                            tableMessage.set("idreceiver", object.id);
+                                            tableMessage.set("idhomework", tableExpense.id);
+                                            tableMessage.set("cost", 0);
+                                            tableMessage.save(null, {
+                                                success: function(tableMessage) {
+                                                    console.log('New tableMessage created with objectId: ' + tableMessage.id);
+                                                    dialog.close();
+                                                    page('/');
+                                                },
+                                                error: function(tableMessage, error) {
+                                                    console.log("Error: " + error.code + " " + error.message);
+                                                }
+                                            });
+                                        }
+                                    },
+                                    error: function(error) {
+                                        console.log("Error: " + error.code + " " + error.message);
+                                    }
+                                });
+                            }
 
                         },
                         error: function(tableExpense, error) {
                             // Execute any logic that should take place if the save fails.
                             // error is a Parse.Error with an error code and message.
+                            app.$.toast.text ='ERROR to create hoemwork!!';
+                            app.$.toast.show();
                             console.log('Failed to create new object, with error code: ' + error.message);
                         }
                     });
-
-                    console.log('poly_app/_saveExpense() ' + "ID: " + sessionStorage.getItem('id'));
+                    
+                    console.log('poly_app/_saveExpense() ');
                 },
 
                 open: function(expense) {
@@ -437,9 +466,9 @@
                         this.set('expense._attachments', expense._attachments);
                     }
 
-                    this.set('expense.merchant', '');
-                    if (expense.merchant) {
-                        this.set('expense.merchant', expense.merchant);
+                    this.set('expense.title', '');
+                    if (expense.title) {
+                        this.set('expense.title', expense.title);
                     }
 
                     this.$.upload.files = [];
@@ -448,9 +477,9 @@
                         this.expense.status = 'new';
                     }
 
-                    if (expense.total) {
+                    /*if (expense.total) {
                         this.$.total.value = expense.total.toFixed(2);
-                    }
+                    }*/
 
                     this.$.delete.hidden = !(this.expense._id && this.expense.status === 'new');
 
@@ -469,7 +498,7 @@
                         dialog.close();
 
                         page('/');
-                        _this.expense = {};
+                        this.expense = {};
                     }, 100);
                 },
 

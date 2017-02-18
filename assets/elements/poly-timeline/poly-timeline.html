@@ -117,11 +117,10 @@
         <vaadin-grid id="expenses" frozen-columns="1">
             <table>
                 <colgroup>
-                    <col name="date" width="120" sortable sort-direction="desc" />
-                    <col name="merchant" flex="1" min-width="145" sortable/>
-                    <col name="total" width="90" sortable/>
+                    <col name="deadline" width="135" sortable sort-direction="desc" />
+                    <col name="title" flex="1" min-width="130" sortable/>
                     <col name="status" width="120" sortable/>
-                    <col name="comment" flex="2" min-width="260" sortable/>
+                    <col name="description" flex="2" min-width="260" sortable/>
                 </colgroup>
             </table>
         </vaadin-grid>
@@ -152,7 +151,8 @@
                 ready: function() {
                     var grid = this.$.expenses;
                     grid.items = [];
-                    this.llenarExpenses(grid);
+                    //this.llenarExpenses(grid);
+                    this.llenarReceived(grid);
 
                     grid.addEventListener('sort-order-changed', function() {
                         if (grid.size > 0) {
@@ -186,10 +186,10 @@
                         grid.columns[0].renderer = function(cell) {
                             cell.element.innerHTML = moment(cell.data).format('MM/DD/YYYY');
                         };
-                        grid.columns[2].renderer = function(cell) {
+                        /*grid.columns[2].renderer = function(cell) {
                             cell.element.innerHTML = '$' + cell.data.toFixed(2);
-                        };
-                        grid.columns[3].renderer = function(cell) {
+                        };*/
+                        grid.columns[2].renderer = function(cell) {
                             var status = cell.data.replace(/_/g, ' ');
                             status = status.charAt(0).toUpperCase() + status.slice(1);
                             cell.element.textContent = status;
@@ -200,10 +200,39 @@
 
                 },
 
+                llenarReceived: function(grid){
+                    var TableMessage = Parse.Object.extend("Message");
+                    var TableHomework = Parse.Object.extend("Homework");
+                    var innerQuery = new Parse.Query(TableMessage);
+                    innerQuery.exists("idreceiver");
+                    var query = new Parse.Query(TableHomework);
+                    query.doesNotMatchQuery("userid", innerQuery);
+                    query.equalTo("userid", sessionStorage.getItem('id'));
+                    query.find({
+                        success: function(results) {
+                            var itemsArray = [];
+                            // Do something with the returned Parse.Object values
+                            for (var i = 0; i < results.length; i++) {
+                                var object = results[i];
+                                itemsArray.push({_id:object.id,
+                                    deadline: object.get('deadline'),
+                                    title: object.get('title'),
+                                    status: 'new',
+                                    description: object.get('description'),
+                                    _attachments: {receipt: object.get('attachment')} });
+                            }
+                            grid.items = itemsArray;
+                        },
+                        error: function(error) {
+                            console.log("Error: " + error.code + " " + error.message);
+                        }
+                    });
+                },
+
                 llenarExpenses: function(grid){
-                    var TableExpense = Parse.Object.extend("Expense");
+                    var TableExpense = Parse.Object.extend("Homework");
                     var query = new Parse.Query(TableExpense);
-                    query.equalTo("user_ID", sessionStorage.getItem('id'));
+                    query.equalTo("userid", sessionStorage.getItem('id'));
                     query.find({
                         success: function(results) {
                             console.log("Successfully retrieved " + results.length + " scores.");
@@ -214,18 +243,17 @@
                                 //itemsArray.push({_id:object.id, date: object.get('Date'), merchant: object.get('Merchant'), total: object.get('Total'), status: 'New', comment: object.get('Comment')});
 
                                 itemsArray.push({_id:object.id,
-                                    date: object.get('Date'),
-                                    merchant: object.get('Merchant'),
-                                    total: object.get('Total'),
+                                    deadline: object.get('deadline'),
+                                    title: object.get('title'),
                                     status: 'new',
-                                    comment: object.get('Comment'),
-                                    _attachments: {receipt: object.get('documentFile')} });
+                                    description: object.get('description'),
+                                    _attachments: {receipt: object.get('attachment')} });
 
-                                console.log(object.id + ' - ' + object.get('Date'));
+                                //console.log(object.id + ' - ' + object.get('Date'));
                                 //this.expenses.addRow(object.get('Date'),object.get('Merchant'),object.get('Comment'),object.get('Total'),'status',object.get('Comment'));
                             }
                             grid.items = itemsArray;
-                            console.log(itemsArray);
+                            //console.log(itemsArray);
                         },
                         error: function(error) {
                             console.log("Error: " + error.code + " " + error.message);
@@ -319,15 +347,15 @@
                     // Filter
                     var result = this.expenses
                         .filter(function(expense) {
-                            return !(merchant && expense.merchant
+                            return !(merchant && expense.title
                                 .toUpperCase().indexOf(merchant.toUpperCase()) < 0);
                         })
-                        .filter(function(expense) {
+                        /*.filter(function(expense) {
                             return !(min && expense.total < min);
                         })
                         .filter(function(expense) {
                             return !(max && expense.total > max);
-                        })
+                        })*/
                         .filter(function(expense) {
                             if (status && status.length > 0) {
                                 return status.indexOf(expense.status) >= 0;
@@ -338,7 +366,7 @@
                         .filter(function(expense) {
                             if (start) {
                                 var startDate = moment(start);
-                                return !!(startDate.isValid() && moment(expense.date).isAfter(startDate));
+                                return !!(startDate.isValid() && moment(expense.deadline).isAfter(startDate));
                             } else {
                                 return true;
                             }
@@ -346,7 +374,7 @@
                         .filter(function(expense) {
                             if (end) {
                                 var endDate = moment(end);
-                                return !!(endDate.isValid() && moment(expense.date).isBefore(endDate));
+                                return !!(endDate.isValid() && moment(expense.deadline).isBefore(endDate));
                             } else {
                                 return true;
                             }
