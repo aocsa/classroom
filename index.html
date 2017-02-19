@@ -127,6 +127,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </a>
 
 
+                <a data-route="pay" href="{{baseUrl}}pay">
+                    <iron-icon icon="info"></iron-icon>
+                    <span>Pay</span>
+                </a>
             </paper-menu>
         </paper-header-panel>
 
@@ -182,10 +186,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </section>
 
                     <section data-route="received" tabindex="-1">
-                        <paper-material elevation="1">
-                            <h1 class="page-title" tabindex="-1">Received</h1>
-                            <p>This is the received section</p>
-                        </paper-material>
+                        <poly-timelinereceived></poly-timelinereceived>
                     </section>
 
                     <section data-route="contact" tabindex="-1">
@@ -205,6 +206,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <section data-route="editor" tabindex="-1">
                         <expense-editor id="expenseEditor" ></expense-editor>
                     </section>
+
+                      <section data-route="pay" tabindex="-1">
+                        <poly-pay id="polypayeditor" ></poly-pay>
+                    </section>
+
 
                     <section data-route="profile" tabindex="-1">
                         <poly-gravatar> </poly-gravatar>

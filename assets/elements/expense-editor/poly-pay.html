@@ -1,8 +1,8 @@
 
-<dom-module id="expense-editor">
+<dom-module id="poly-pay">
     <template>
         <style>
-            #dialog {
+            #dialogpay {
                 display: block;
                 padding: 0 8px;
                 border-top: 3px solid var(--accent-color);
@@ -116,7 +116,7 @@
             }
 
             @media (min-width: 900px) {
-                #dialog {
+                #dialogpay {
                     display: flex;
                     flex-direction: column;
                 }
@@ -141,7 +141,7 @@
                 .receipt .receipt-wrapper {
                     max-height: inherit;
                 }
-                #dialog {
+                #dialogpay {
                     width: 100vw;
                     min-height: 100vh;
                     padding: 0 0 60px 0;
@@ -153,7 +153,7 @@
         <app-route route="{{route}}" pattern="/:action" data="{{routeData}}"></app-route>
 
         <iron-media-query query="(min-height: 900px)" query-matches="{{tallWindow}}"></iron-media-query>
-        <paper-dialog id="dialog" modal no-cancel-on-esc-key="false" opened="{{_showDialog(route.path)}}">
+        <paper-dialog id="dialogpay" modal no-cancel-on-esc-key="false" opened="{{_showDialog(route.path)}}">
             <div class="main-layout">
                 <h2>{{caption}}</h2>
                 <span class="flex"></span>
@@ -181,6 +181,11 @@
                             </div>
                         </div>
                     </vaadin-upload>
+
+                     <paper-input name="transaction" id="transaction" value="{{expense.transaction}}"   max="10000" label="transaction" required step="any">
+                           <div prefix>$</div>
+                       </paper-input>
+
                 </div>
             </div>
             <div class="buttons-layout">
@@ -197,7 +202,7 @@
             'use strict';
 
             Polymer({
-                is: 'expense-editor',
+                is: 'poly-pay',
 
                 properties: {
                     service: Object,
@@ -217,8 +222,7 @@
                     db: Object,
                     _receiptURL: {
                         type: String,
-                        notify: true,
-                        value: 'assets/img/default-receipt.png'
+                        notify: true
                     },
                     route: Object,
                     routeData: Object
@@ -241,7 +245,7 @@
                 },
 
                 _onResize: function() {
-                    this.$.dialog.notifyResize();
+                    this.$.dialogpay.notifyResize();
                 },
 
                 _showDialog: function() {
@@ -265,14 +269,14 @@
                     if (this.expense._attachments && this.expense._attachments.receipt) {
                         if (this.expense._attachments.receipt.data instanceof File ||
                             this.expense._attachments.receipt.data instanceof Blob) {
-                            this._receiptURL = URL.createObjectURL(this.expense._attachments.receipt.data);
+                            //this._receiptURL = URL.createObjectURL(this.expense._attachments.receipt.data);
                         } else {
-                            this._receiptURL = this.expense._attachments.receipt.url;
+                            //this._receiptURL = this.expense._attachments.receipt.url;
                         }
                     } else {
-                        this._receiptURL = 'assets/img/default-receipt.png';
+                        //this._receiptURL = 'assets/img/default-receipt.png';
                     }
-                    this.$.dialog.notifyResize();
+                    this.$.dialogpay.notifyResize();
                 },
 
                 listeners: {
@@ -365,30 +369,28 @@
                         console.log("Form NO valido ");
                     }
                 },
-                _saveExpense: function(expense) {
-                    //this._db.save(expense);
-                    //this.fire('expenses-updated');
-                    // PARSE YA ESTA INICIALIZADO EN POLY-PROFILE
-                    var TableExpense = Parse.Object.extend("Homework");
-                    var tableExpenseData = new TableExpense();
+                 _saveExpense: function(expense) {
 
-                    // crud:update code
-                    var localObj = JSON.parse(localStorage.getItem("expense")); // recover item from table list
-                    var is_update = false;
-                    if(localObj._id){//Si es que ya existe un id , se actualiza
-                        tableExpenseData.set("objectId",localObj._id);
-                        is_update = true;
-                    }
-                    tableExpenseData.set("title", expense.title);
-                    tableExpenseData.set("deadline", expense.deadline);
-                    tableExpenseData.set("description", expense.description);
-                    tableExpenseData.set("status", "new");
-                    var User_ = Parse.Object.extend("User");
-                    var myuser = new User_();
-                    myuser.id = sessionStorage.getItem('id');
-                    tableExpenseData.set("homework_user", myuser);
+                   //this._db.save(expense);
 
-                    //Guardar archivo/imagen en Parse
+                   // PARSE YA ESTA INICIALIZADO EN POLY-PROFILE
+                   var UserClass = Parse.Object.extend("User");
+                   var user_sender = new UserClass();
+                   user_sender.id = sessionStorage.getItem('id');
+
+                   var user_receiver = new UserClass();
+                   user_receiver.id =  expense.sender_user_id;
+
+                   var TableMessage = Parse.Object.extend("Message");
+                   var tableMessage = new TableMessage();
+                   tableMessage.set("sender", user_sender);
+                   tableMessage.set("receiver", user_receiver);
+                   tableMessage.set("cost", expense.total);
+
+                   var PaymentClass = Parse.Object.extend("Payment");
+                   var paymentObj = new PaymentClass();
+                   paymentObj.set('code',this.expense.transaction);
+                   //Guardar archivo/imagen en Parse
                     if (expense._attachments && expense._attachments.receipt) {
                         var name = "nameimg.jpg";
                         var file = new File([expense._attachments.receipt.data],name);
@@ -400,74 +402,33 @@
                             // The file either could not be read, or could not be saved to Parse.
                             console.log('error parseFile');
                         });
-                        tableExpenseData.set("attachment", parseFile);
+                        paymentObj.set("attachment", parseFile);
                     }
-                    
-                    tableExpenseData.save(null, {
-                        success: function(tableExpense) {
-                            // Execute any logic that should take place after the object is saved.
-                            //app.$.toast.text = 'New object created with objectId: ' + tableExpense.id;
-                            app.$.toast.text ='New Homework created!!';
-                            app.$.toast.show();
-                            
-                            console.log('New object created with objectId: ' + tableExpense.id + 'is_update: '+ is_update);
-                            if(is_update){
-                                dialog.close();
-                                page('/');
-                            }else{
-                                //School_User esta en sessionStorage.getItem('school')
-                                //Sacaremos todos los usuarios que sean profesores y que tengan la misma escuela que el usuario_current
-                                //var TableUser = Parse.Object.extend("User");
-                                var query = new Parse.Query(User_);
-                                query.equalTo("user_type", 'Profesor');
-                                query.equalTo("school", sessionStorage.getItem('school'));
-                                query.find({
-                                    success: function(results) {
-                                        console.log("Successfully retrieved " + results.length + " scores.");
-                                        //SAVE TABLE Message
-                                        var user_sender = new User_();
-                                        user_sender.id = sessionStorage.getItem('id');
-                                        for (var i = 0; i < results.length; i++) {
-                                            var object = results[i];
-                                            var user_receiver = new User_();
-                                            user_receiver.id = object.id;
 
-                                            var TableMessage = Parse.Object.extend("Message ");
-                                            var tableMessage = new TableMessage();
-                                            tableMessage.set("sender", user_sender);
-                                            tableMessage.set("receiver", user_receiver);
-                                            tableMessage.set("cost", 0);
-                                            tableMessage.set("homework", tableExpenseData);
-                                            tableMessage.save(null, {
-                                                success: function(tableMessage) {
-                                                    console.log('New tableMessage created with objectId: ' + tableMessage.id);
-                                                    dialog.close();
-                                                    page('/');
-                                                },
-                                                error: function(tableMessage, error) {
-                                                    console.log("Error: " + error.code + " " + error.message);
-                                                }
-                                            });
-                                        }
-                                    },
-                                    error: function(error) {
-                                        console.log("Error: " + error.code + " " + error.message);
-                                    }
-                                });
-                            }
+                   tableMessage.set("payment", paymentObj);
 
-                        },
-                        error: function(tableExpense, error) {
-                            // Execute any logic that should take place if the save fails.
-                            // error is a Parse.Error with an error code and message.
-                            app.$.toast.text ='ERROR to create hoemwork!!';
-                            app.$.toast.show();
-                            console.log('Failed to create new object, with error code: ' + error.message);
-                        }
-                    });
-                    
-                    console.log('poly_app/_saveExpense() ');
-                },
+                   var HomeworkClass = Parse.Object.extend("Homework");
+                   var homework = new HomeworkClass();
+                   homework.id = expense._id;
+
+                   tableMessage.set("homework", homework);
+
+                   tableMessage.save(null, {
+                       success: function(tableMessage) {
+                           console.log('New tableMessage created with objectId: ' + tableMessage.id);
+                           dialogpay.close();
+                           page('/received');
+                       },
+                       error: function(tableMessage, error) {
+                           console.log("Error: " + error.code + " " + error.message);
+                       }
+                   });
+
+                   app.$.toast.text = 'New object created with objectId: ' + tableMessage.id;
+                   app.$.toast.show();
+
+                   console.log('poly_app/_saveExpense() ' + "ID: " + sessionStorage.getItem('id'));
+               },
 
                 open: function(expense) {
 
@@ -477,7 +438,7 @@
 
                     // File objects don't survive the JSON dance, so copy that over manually
                     if (expense._attachments) {
-                        this.set('expense._attachments', expense._attachments);
+                        //this.set('expense._attachments', expense._attachments);
                     }
 
                     this.set('expense.title', '');
@@ -499,19 +460,19 @@
 
                     // Ensure that the scroll is returned to top on mobile
                     this.async(function() {
-                        this.$.dialog.scrollTop = 0;
+                        this.$.dialogpay.scrollTop = 0;
                     });
 
-                    dialog.open();
+                    dialogpay.open();
                 },
 
                 close: function() {
                     var _this = this;
                     this.async(function() {
                         // Prevent tap from leaking through to underlying page
-                        dialog.close();
+                        dialogpay.close();
 
-                        page('/');
+                        page('/received');
                         this.expense = {};
                     }, 100);
                 },

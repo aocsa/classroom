@@ -1,7 +1,7 @@
 <link rel="import" href="moment-js.html">
 
 
-<dom-module id="poly-timeline">
+<dom-module id="poly-timelinereceived">
     <template>
         <style>
             :host {
@@ -131,7 +131,7 @@
             'use strict';
 
             Polymer({
-                is: 'poly-timeline',
+                is: 'poly-timelinereceived',
 
                 properties: {
                     expenses: Array,
@@ -148,12 +148,38 @@
                     '_update(sortDirection)'
                 ],
 
+                _test: function(){
+                    // Declare the types.
+                    var Post = Parse.Object.extend("Homework");
+                    var Comment = Parse.Object.extend("Comment");
+
+                    // Create the post
+                    var myPost = new Post();
+                    myPost.set("title", 'expense.title');
+                    myPost.set("deadline", '2017-10-10');
+                    myPost.set("description", 'expense.description');
+                    myPost.set("userid", 'idfalse');
+
+                    // Create the comment
+                    var myComment = new Comment();
+                    myComment.set("content", "Let's do Sushirrito.");
+
+                    // Add the post as a value in the comment
+                    myComment.set("parent", myPost);
+
+                    // This will save both myPost and myComment
+                    myComment.save();
+                },
+
                 ready: function() {
                     var grid = this.$.expenses;
                     grid.items = [];
-                    this.llenarExpenses(grid);
+                    this.llenarReceived(grid);
+                    //this._test();
                     console.log('termino ready');
+                    //console.log(grid);
 
+                    console.log(grid.items);
                     grid.addEventListener('sort-order-changed', function() {
                         if (grid.size > 0) {
                             grid.scrollToStart();
@@ -167,7 +193,7 @@
                             grid.getItem(selection[0], function(err, item) {
                                 //this.fire('edit-expense', item);
                                 localStorage.setItem("expense", JSON.stringify(item));
-                                page('/editor');
+                                page('/pay');
                             }.bind(this));
                         }
                     }.bind(this));
@@ -197,33 +223,39 @@
 
                         grid.header.getCell(0, 2).className = 'total';
                     });
-
                 },
 
-                llenarExpenses: function(grid){
-                    var TableExpense = Parse.Object.extend("Homework");
-                    var query = new Parse.Query(TableExpense);
-                    query.find({
-                        success: function(results) {
-                            console.log("Successfully retrieved " + results.length + " scores.");
-                            var itemsArray = [];
-                            // Do something with the returned Parse.Object values
-                            for (var i = 0; i < results.length; i++) {
-                                var object = results[i];
-                                //itemsArray.push({_id:object.id, date: object.get('Date'), merchant: object.get('Merchant'), total: object.get('Total'), status: 'New', comment: object.get('Comment')});
+                llenarReceived: function(grid){
+                    var TableMessage = Parse.Object.extend("Message");
+                   var query = new Parse.Query(TableMessage);
+                   var userClass = Parse.Object.extend("User");
+                   var userObj = new userClass( );
+                   userObj.id =  sessionStorage.getItem('id');
 
-                                itemsArray.push({_id:object.id,
-                                    deadline: object.get('deadline'),
-                                    title: object.get('title'),
-                                    status: object.get('status'),
-                                    description: object.get('description'),
-                                    _attachments: {receipt: object.get('attachment')} });
+                   query.equalTo("receiver",   userObj);
 
-                                //console.log(object.id + ' - ' + object.get('Date'));
-                                //this.expenses.addRow(object.get('Date'),object.get('Merchant'),object.get('Comment'),object.get('Total'),'status',object.get('Comment'));
-                            }
-                            grid.items = itemsArray;
-                            //console.log(itemsArray);
+                   query.include("homework");
+
+                   query.find({
+                       success: function(results) {
+                           console.log("Successfully retrieved " + results.length + " scores.");
+                           //console.log(results);
+                           var itemsArray = [];
+                           // Do something with the returned Parse.Object values
+                           for (var i = 0; i < results.length; i++) {
+                               var object = results[i];
+                               itemsArray.push({_id:object.get('homework').id,
+                                               deadline: object.get('homework').get('deadline'),
+                                               title: object.get('homework').get('title'),
+                                               total: object.get('cost'),
+                                               status: object.get('homework').get('status'),
+                                               description: object.get('homework').get('description'),
+                                               homework_user_id: object.get('homework').get('homework_user').id,
+                                               sender_user_id: object.get('sender').id,
+                                               _attachments: {receipt: object.get('homework').get('attachment')} });
+                           }
+                           console.log(itemsArray);
+                           grid.items = itemsArray;
                         },
                         error: function(error) {
                             console.log("Error: " + error.code + " " + error.message);
@@ -285,7 +317,8 @@
                 _showExpenseEditor: function() {
                     localStorage.setItem("expense", JSON.stringify({}));
 
-                    page('/editor');
+                    page('/pay');
+
                 },
 
                 _filtersChanged: function() {
