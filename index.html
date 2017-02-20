@@ -106,14 +106,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <span>Home</span>
                 </a>
 
-                <a data-route="users" href="{{baseUrl}}users">
-                    <iron-icon icon="info"></iron-icon>
-                    <span>Users</span>
+                <a data-route="myhomeworks" href="{{baseUrl}}myhomeworks">
+                    <iron-icon icon="mail"></iron-icon>
+                    <span>My Homeworks</span>
                 </a>
-                
+
                 <a data-route="received" href="{{baseUrl}}received">
                     <iron-icon icon="mail"></iron-icon>
                     <span>Received</span>
+                </a>
+
+                <a data-route="users" href="{{baseUrl}}users">
+                    <iron-icon icon="info"></iron-icon>
+                    <span>Users</span>
                 </a>
 
                 <a data-route="contact" href="{{baseUrl}}contact">
@@ -121,16 +126,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <span>Contact</span>
                 </a>
 
-                <a data-route="editor" href="{{baseUrl}}editor">
-                    <iron-icon icon="info"></iron-icon>
-                    <span>Editor</span>
-                </a>
 
 
-                <a data-route="pay" href="{{baseUrl}}pay">
-                    <iron-icon icon="info"></iron-icon>
-                    <span>Pay</span>
-                </a>
             </paper-menu>
         </paper-header-panel>
 
@@ -185,6 +182,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         </paper-material>
                     </section>
 
+                    <section data-route="myhomeworks" tabindex="-1">
+                        <poly-myhomeworks></poly-myhomeworks>
+                    </section>
+
                     <section data-route="received" tabindex="-1">
                         <poly-timelinereceived></poly-timelinereceived>
                     </section>
@@ -207,8 +208,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <expense-editor id="expenseEditor" ></expense-editor>
                     </section>
 
-                      <section data-route="pay" tabindex="-1">
+                    <section data-route="pay" tabindex="-1">
                         <poly-pay id="polypayeditor" ></poly-pay>
+                    </section>
+
+                    <section data-route="editorhome" tabindex="-1">
+                        <poly-editorhome id="polyeditorhome" ></poly-editorhome>
                     </section>
 
 

@@ -65,6 +65,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             setFocus(app.route);
         });
 
+        page('/myhomeworks', function() {
+            app.route = 'myhomeworks';
+            setFocus(app.route);
+        });
+
         page('/received', function() {
             app.route = 'received';
             setFocus(app.route);
@@ -96,6 +101,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             setFocus(app.route);
 
             var expenseEditor = document.querySelector('#polypayeditor');
+            var localObj = JSON.parse(localStorage.getItem("expense"));
+
+            expenseEditor.open(localObj);
+
+        });
+
+        page('/editorhome', function() {
+            app.route = 'editorhome';
+            setFocus(app.route);
+
+            var expenseEditor = document.querySelector('#polyeditorhome');
             var localObj = JSON.parse(localStorage.getItem("expense"));
 
             expenseEditor.open(localObj);

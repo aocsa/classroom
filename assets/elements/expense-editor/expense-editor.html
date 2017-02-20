@@ -164,8 +164,8 @@
                 <div class="form">
                     <form is="iron-form" id="form">
                         <iron-a11y-keys keys="enter" on-keys-pressed="_save"></iron-a11y-keys>
-                        <vaadin-combo-box name="merchant" id="merchant" items="[[merchants]]" value="{{expense.title}}" label="Title" allow-custom-value required></vaadin-combo-box>
-                        <paper-input name="total" id="total" value="{{expense.total}}" type="number" max="10000" label="Total" required step="any">
+                        <paper-input name="merchant" id="merchant" value="{{expense.title}}" label="Title" allow-custom-value required></paper-input>
+                        <paper-input name="total" id="total" value="{{expense.total}}" type="number" max="10000" label="Total" required step="any" hidden>
                            <div prefix>$</div>
                        </paper-input>
 
@@ -413,7 +413,7 @@
                             console.log('New object created with objectId: ' + tableExpense.id + 'is_update: '+ is_update);
                             if(is_update){
                                 dialog.close();
-                                page('/');
+                                page('/myhomeworks');
                             }else{
                                 //School_User esta en sessionStorage.getItem('school')
                                 //Sacaremos todos los usuarios que sean profesores y que tengan la misma escuela que el usuario_current
@@ -442,7 +442,7 @@
                                                 success: function(tableMessage) {
                                                     console.log('New tableMessage created with objectId: ' + tableMessage.id);
                                                     dialog.close();
-                                                    page('/');
+                                                    page('/myhomeworks');
                                                 },
                                                 error: function(tableMessage, error) {
                                                     console.log("Error: " + error.code + " " + error.message);
@@ -511,7 +511,7 @@
                         // Prevent tap from leaking through to underlying page
                         dialog.close();
 
-                        page('/');
+                        page('/myhomeworks');
                         this.expense = {};
                     }, 100);
                 },

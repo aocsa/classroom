@@ -1,7 +1,7 @@
 <link rel="import" href="moment-js.html">
 
 
-<dom-module id="poly-timelinereceived">
+<dom-module id="poly-myhomeworks">
     <template>
         <style>
             :host {
@@ -131,7 +131,7 @@
             'use strict';
 
             Polymer({
-                is: 'poly-timelinereceived',
+                is: 'poly-myhomeworks',
 
                 properties: {
                     expenses: Array,
@@ -148,38 +148,12 @@
                     '_update(sortDirection)'
                 ],
 
-                _test: function(){
-                    // Declare the types.
-                    var Post = Parse.Object.extend("Homework");
-                    var Comment = Parse.Object.extend("Comment");
-
-                    // Create the post
-                    var myPost = new Post();
-                    myPost.set("title", 'expense.title');
-                    myPost.set("deadline", '2017-10-10');
-                    myPost.set("description", 'expense.description');
-                    myPost.set("userid", 'idfalse');
-
-                    // Create the comment
-                    var myComment = new Comment();
-                    myComment.set("content", "Let's do Sushirrito.");
-
-                    // Add the post as a value in the comment
-                    myComment.set("parent", myPost);
-
-                    // This will save both myPost and myComment
-                    myComment.save();
-                },
-
                 ready: function() {
                     var grid = this.$.expenses;
                     grid.items = [];
-                    this.llenarReceived(grid);
-                    //this._test();
+                    this.llenarExpenses(grid);
                     console.log('termino ready');
-                    //console.log(grid);
 
-                    console.log(grid.items);
                     grid.addEventListener('sort-order-changed', function() {
                         if (grid.size > 0) {
                             grid.scrollToStart();
@@ -193,7 +167,7 @@
                             grid.getItem(selection[0], function(err, item) {
                                 //this.fire('edit-expense', item);
                                 localStorage.setItem("expense", JSON.stringify(item));
-                                page('/pay');
+                                page('/editor');
                             }.bind(this));
                         }
                     }.bind(this));
@@ -223,47 +197,39 @@
 
                         grid.header.getCell(0, 2).className = 'total';
                     });
+
                 },
 
-                llenarReceived: function(grid){
-                    var TableMessage = Parse.Object.extend("Message");
-                   var query = new Parse.Query(TableMessage);
-                   var userClass = Parse.Object.extend("User");
-                   var userObj = new userClass( );
-                   userObj.id =  sessionStorage.getItem('id');
+                llenarExpenses: function(grid){
+                    var TableExpense = Parse.Object.extend("Homework");
+                    var query = new Parse.Query(TableExpense);
+                    
+                    var userClass = Parse.Object.extend("User");
+                    var userObj = new userClass();
+                    userObj.id = sessionStorage.getItem('id');
 
-                   query.equalTo("receiver",   userObj);
+                    query.equalTo("homework_user", userObj);
+                    query.find({
+                        success: function(results) {
+                            console.log("Successfully retrieved " + results.length + " scores.");
+                            var itemsArray = [];
+                            // Do something with the returned Parse.Object values
+                            for (var i = 0; i < results.length; i++) {
+                                var object = results[i];
+                                //itemsArray.push({_id:object.id, date: object.get('Date'), merchant: object.get('Merchant'), total: object.get('Total'), status: 'New', comment: object.get('Comment')});
 
-                   query.include("homework");
-                   query.include("sender");
+                                itemsArray.push({_id:object.id,
+                                    deadline: object.get('deadline'),
+                                    title: object.get('title'),
+                                    status: object.get('status'),
+                                    description: object.get('description'),
+                                    _attachments: {receipt: object.get('attachment')} });
 
-                   query.find({
-                       success: function(results) {
-                           console.log("Successfully retrieved " + results.length + " scores.");
-                           //console.log(results);
-                           var itemsArray = [];
-                           // Do something with the returned Parse.Object values
-                           for (var i = 0; i < results.length; i++) {
-                               var object = results[i];
-                               /*if(itemsArray.hasOwnProperty(object.get('homework').id)){
-                                   //añade al profesor y costo
-                               }
-                               else{*/
-                                   //añade un nuevo elemento
-                                   itemsArray.push({_id:object.get('homework').id,
-                                               deadline: object.get('homework').get('deadline'),
-                                               title: object.get('homework').get('title'),
-                                               total: object.get('cost'),
-                                               status: object.get('homework').get('status'),
-                                               description: object.get('homework').get('description'),
-                                               homework_user_id: object.get('homework').get('homework_user').id,
-                                               sender_user_id: object.get('sender').id,
-                                               professor: object.get('sender').get('name') });
-                               //}
-                               
-                           }
-                           console.log(itemsArray);
-                           grid.items = itemsArray;
+                                //console.log(object.id + ' - ' + object.get('Date'));
+                                //this.expenses.addRow(object.get('Date'),object.get('Merchant'),object.get('Comment'),object.get('Total'),'status',object.get('Comment'));
+                            }
+                            grid.items = itemsArray;
+                            //console.log(itemsArray);
                         },
                         error: function(error) {
                             console.log("Error: " + error.code + " " + error.message);
@@ -325,8 +291,7 @@
                 _showExpenseEditor: function() {
                     localStorage.setItem("expense", JSON.stringify({}));
 
-                    page('/pay');
-
+                    page('/editor');
                 },
 
                 _filtersChanged: function() {

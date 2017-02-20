@@ -152,7 +152,6 @@
                     var grid = this.$.expenses;
                     grid.items = [];
                     this.llenarExpenses(grid);
-                    console.log('termino ready');
 
                     grid.addEventListener('sort-order-changed', function() {
                         if (grid.size > 0) {
@@ -167,7 +166,7 @@
                             grid.getItem(selection[0], function(err, item) {
                                 //this.fire('edit-expense', item);
                                 localStorage.setItem("expense", JSON.stringify(item));
-                                page('/editor');
+                                page('/editorhome');
                             }.bind(this));
                         }
                     }.bind(this));
@@ -249,7 +248,7 @@
                             grid.getItem(selection[0], function(err, item) {
 
                                 //this.fire('edit-expense', item);
-                                page('/editor');
+                                page('/editorhome');
 
                             }.bind(this));
                         }
@@ -285,7 +284,7 @@
                 _showExpenseEditor: function() {
                     localStorage.setItem("expense", JSON.stringify({}));
 
-                    page('/editor');
+                    page('/editorhome');
                 },
 
                 _filtersChanged: function() {
