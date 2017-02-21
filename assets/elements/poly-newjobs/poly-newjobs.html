@@ -1,7 +1,7 @@
 <link rel="import" href="moment-js.html">
 
 
-<dom-module id="poly-timelinereceived">
+<dom-module id="poly-newjobs">
     <template>
         <style>
             :host {
@@ -70,7 +70,7 @@
                 font-weight: 500;
             }
 
-            vaadin-grid /deep/ td.status-cotizado {
+            vaadin-grid /deep/ td.status-in_progress {
                 font-weight: 500;
                 font-style: italic;
                 text-transform: capitalize;
@@ -117,21 +117,22 @@
         <vaadin-grid id="expenses" frozen-columns="1">
             <table>
                 <colgroup>
-                    <col name="deadline" width="135" sortable sort-direction="desc" />
-                    <col name="title" flex="1" min-width="130" sortable/>
-                    <col name="status" width="120" sortable/>
+                    <col name="deadline" width="120" sortable sort-direction="desc" />
+                    <col name="title" flex="1" min-width="145" sortable/>
+                    <col name="total" width="90" sortable hidden/>
+                    <col name="status" width="120" sortable />
                     <col name="description" flex="2" min-width="260" sortable/>
                 </colgroup>
             </table>
         </vaadin-grid>
-        <paper-fab icon="add" on-tap="_showExpenseEditor" id="add-button" hidden></paper-fab>
+        <paper-fab icon="add" on-tap="_showExpenseEditor" id="add-button"></paper-fab>
     </template>
     <script>
         (function() {
             'use strict';
 
             Polymer({
-                is: 'poly-timelinereceived',
+                is: 'poly-newjobs',
 
                 properties: {
                     expenses: Array,
@@ -145,41 +146,21 @@
                     '_filtersChanged(filters.*)',
                     '_update(expenses.*)',
                     '_update(sortColumn)',
-                    '_update(sortDirection)'
+                    '_update(sortDirection)',
                 ],
-
-                _test: function(){
-                    // Declare the types.
-                    var Post = Parse.Object.extend("Homework");
-                    var Comment = Parse.Object.extend("Comment");
-
-                    // Create the post
-                    var myPost = new Post();
-                    myPost.set("title", 'expense.title');
-                    myPost.set("deadline", '2017-10-10');
-                    myPost.set("description", 'expense.description');
-                    myPost.set("userid", 'idfalse');
-
-                    // Create the comment
-                    var myComment = new Comment();
-                    myComment.set("content", "Let's do Sushirrito.");
-
-                    // Add the post as a value in the comment
-                    myComment.set("parent", myPost);
-
-                    // This will save both myPost and myComment
-                    myComment.save();
+                listeners: {
+                  //'edit-expense': '_editExpense',
+                  'expenses-updated': '_expensesUpdated',
+                  'expense-saved': '_saveExpense',
+                  'delete-expense': '_deleteExpense'
                 },
+
 
                 ready: function() {
                     var grid = this.$.expenses;
                     grid.items = [];
                     this.llenarReceived(grid);
-                    //this._test();
-                    console.log('termino ready');
-                    //console.log(grid);
 
-                    console.log(grid.items);
                     grid.addEventListener('sort-order-changed', function() {
                         if (grid.size > 0) {
                             grid.scrollToStart();
@@ -192,13 +173,11 @@
                         if (selection.length === 1) {
                             grid.getItem(selection[0], function(err, item) {
                                 //this.fire('edit-expense', item);
-                                if(item.status=='en progreso'){
-                                    localStorage.setItem("sender", JSON.stringify(item));
-                                     page('/chat');
-                                
-                                }else{
-                                    localStorage.setItem("expense", JSON.stringify(item));
-                                    page('/pay');
+                                if (item.status === 'new') {
+
+                                  localStorage.setItem("expense", JSON.stringify(item));
+                                  page('/editor');
+
                                 }
                             }.bind(this));
                         }
@@ -209,8 +188,8 @@
                             return 'status-' + cell.data.replace(/ /g, '-').toLowerCase();
                         } else if (cell.columnName === 'total') {
                             return 'total';
-                        } else if (cell.columnName === 'comment') {
-                            return 'comment';
+                        } else if (cell.columnName === 'description') {
+                            return 'description';
                         }
                     };
 
@@ -218,10 +197,10 @@
                         grid.columns[0].renderer = function(cell) {
                             cell.element.innerHTML = moment(cell.data).format('MM/DD/YYYY');
                         };
-                        /*grid.columns[2].renderer = function(cell) {
-                            cell.element.innerHTML = '$' + cell.data.toFixed(2);
-                        };*/
                         grid.columns[2].renderer = function(cell) {
+                            cell.element.innerHTML = '$' + cell.data.toFixed(2);
+                        };
+                        grid.columns[3].renderer = function(cell) {
                             var status = cell.data.replace(/_/g, ' ');
                             status = status.charAt(0).toUpperCase() + status.slice(1);
                             cell.element.textContent = status;
@@ -229,10 +208,11 @@
 
                         grid.header.getCell(0, 2).className = 'total';
                     });
+
                 },
 
                 llenarReceived: function(grid){
-                    var TableMessage = Parse.Object.extend("Message");
+                   var TableMessage = Parse.Object.extend("Message");
                    var query = new Parse.Query(TableMessage);
                    var userClass = Parse.Object.extend("User");
                    var userObj = new userClass( );
@@ -241,55 +221,33 @@
                    query.equalTo("receiver",   userObj);
 
                    query.include("homework");
-                   query.include("sender");
 
                    query.find({
                        success: function(results) {
                            console.log("Successfully retrieved " + results.length + " scores.");
                            //console.log(results);
                            var itemsArray = [];
-                           var setClass = new StringSet();
                            // Do something with the returned Parse.Object values
-                           var contador= 0;
-                           var profesores = {};
-
                            for (var i = 0; i < results.length; i++) {
                                var object = results[i];
-                               var existObj = setClass.contains(object.get('homework').id);
-                               var hid = object.get('homework').id;
-                               
-                               if( (object.get('homework').get('status')=='cotizado' || object.get('homework').get('status')=='en progreso') ){
-                                   if(!existObj){
-                                        profesores[hid] = [];
-                                        setClass.add(hid);
-                                        itemsArray.push({_id:object.get('homework').id,
-                                                    deadline: object.get('homework').get('deadline'),
-                                                    title: object.get('homework').get('title'),
-                                                    total: object.get('cost'),
-                                                    status: object.get('homework').get('status'),
-                                                    description: object.get('homework').get('description'),
-                                                    homework_user_id: object.get('homework').get('homework_user').id,
-                                                    sender_user_id: object.get('sender').id,
-                                                    professor: object.get('sender').get('name'),
-                                                    elementos : []
-                                                     });
-                                        contador = contador + 1;
-                                    }
-                                    profesores[hid].push({professor: object.get('sender').get('name'), total: object.get('cost'), sender_user_id: object.get('sender').id});
+                               if (object.get('homework').get('status') === 'nuevo' || object.get('homework').get('status') === 'cotizado' ){
+                                 itemsArray.push({_id:object.get('homework').id,
+                                                 deadline: object.get('homework').get('deadline'),
+                                                 title: object.get('homework').get('title'),
+                                                 status: object.get('homework').get('status'),
+                                                 description: object.get('homework').get('description'),
+                                                 homework_user_id: object.get('homework').get('homework_user').id,
+                                                 _attachments: {receipt: object.get('homework').get('attachment')} });
                                }
-                           }
-
-                           for (var i = 0 ; i < itemsArray.length; i++) {
-                                itemsArray[i].elementos = profesores[ itemsArray[i]._id  ] ;
                            }
                            console.log(itemsArray);
                            grid.items = itemsArray;
-                        },
-                        error: function(error) {
-                            console.log("Error: " + error.code + " " + error.message);
-                        }
-                    });
-                },
+                       },
+                       error: function(error) {
+                           console.log("Error: " + error.code + " " + error.message);
+                       }
+                   });
+               },
                 handleResponse: function(res) {
                     this.expenses = res.detail.response;
                     var grid = this.$.expenses;
@@ -320,8 +278,8 @@
                             return 'status-' + cell.data.replace(/ /g, '-').toLowerCase();
                         } else if (cell.columnName === 'total') {
                             return 'total';
-                        } else if (cell.columnName === 'comment') {
-                            return 'comment';
+                        } else if (cell.columnName === 'description') {
+                            return 'description';
                         }
                     };
 
@@ -343,11 +301,39 @@
                 },
 
                 _showExpenseEditor: function() {
-                    localStorage.setItem("expense", JSON.stringify({}));
 
-                    page('/pay');
+
+                    localStorage.setItem("expense", JSON.stringify({}));
+                    page('/editor');
 
                 },
+
+                _saveExpense: function(evt) {
+                   var expense = evt.detail;
+                   this._db.save(expense);
+                   this.fire('expenses-updated');
+                 },
+               _deleteExpense: function(evt) {
+                 var expense = evt.detail;
+                 this._db.remove(expense);
+                 this.fire('expenses-updated', {
+                   reason: 'deleted'
+                 });
+               },
+
+               _expensesUpdated: function(evt) {
+                 /*this.$.expenseEditor.close();
+                 if (evt.detail.reason === 'deleted') {
+                   this.$.saveNotification.text = 'Expense was deleted';
+                 } else {
+                   this.$.saveNotification.text = 'Expense was saved';
+                 }
+                 this.$.saveNotification.show();*/
+                 var grid = this.$.expenses;
+                 grid.items = [];
+                 this.llenarReceived(grid);
+
+               },
 
                 _filtersChanged: function() {
                     if (this.$.expenses.items) {
@@ -362,7 +348,7 @@
                         return;
                     }
                     var grid = this.$.expenses;
-                    var merchant = this.filters.merchant;
+                    var title = this.filters.title;
                     var min = this.filters.min;
                     var max = this.filters.max;
                     var status = this.filters.status;
@@ -378,15 +364,15 @@
                     // Filter
                     var result = this.expenses
                         .filter(function(expense) {
-                            return !(merchant && expense.title
-                                .toUpperCase().indexOf(merchant.toUpperCase()) < 0);
+                            return !(title && expense.title
+                                .toUpperCase().indexOf(title.toUpperCase()) < 0);
                         })
-                        /*.filter(function(expense) {
+                        .filter(function(expense) {
                             return !(min && expense.total < min);
                         })
                         .filter(function(expense) {
                             return !(max && expense.total > max);
-                        })*/
+                        })
                         .filter(function(expense) {
                             if (status && status.length > 0) {
                                 return status.indexOf(expense.status) >= 0;
@@ -397,7 +383,7 @@
                         .filter(function(expense) {
                             if (start) {
                                 var startDate = moment(start);
-                                return !!(startDate.isValid() && moment(expense.deadline).isAfter(startDate));
+                                return !!(startDate.isValid() && moment(expense.date).isAfter(startDate));
                             } else {
                                 return true;
                             }
@@ -405,7 +391,7 @@
                         .filter(function(expense) {
                             if (end) {
                                 var endDate = moment(end);
-                                return !!(endDate.isValid() && moment(expense.deadline).isBefore(endDate));
+                                return !!(endDate.isValid() && moment(expense.date).isBefore(endDate));
                             } else {
                                 return true;
                             }

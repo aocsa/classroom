@@ -165,7 +165,7 @@
                     <form is="iron-form" id="form">
                         <iron-a11y-keys keys="enter" on-keys-pressed="_save"></iron-a11y-keys>
                         <paper-input name="merchant" id="merchant" value="{{expense.title}}" label="Title" allow-custom-value required></paper-input>
-                        <paper-input name="total" id="total" value="{{expense.total}}" type="number" max="10000" label="Total" required step="any" hidden>
+                        <paper-input name="total" id="total" value="{{expense.total}}" type="number" max="10000" label="Total" step="any" hidden>
                            <div prefix>$</div>
                        </paper-input>
 
@@ -257,7 +257,7 @@
                 },
 
                 _showReceipt: function() {
-                    return this.expense._id && this.expense.status !== 'new' ||
+                    return this.expense._id && this.expense.status !== 'nuevo' ||
                         this.expense._attachments && this.expense._attachments.receipt;
                 },
 
@@ -382,7 +382,7 @@
                     tableExpenseData.set("title", expense.title);
                     tableExpenseData.set("deadline", expense.deadline);
                     tableExpenseData.set("description", expense.description);
-                    tableExpenseData.set("status", "new");
+                    tableExpenseData.set("status", "nuevo");
                     var User_ = Parse.Object.extend("User");
                     var myuser = new User_();
                     myuser.id = sessionStorage.getItem('id');
@@ -413,7 +413,7 @@
                             console.log('New object created with objectId: ' + tableExpense.id + 'is_update: '+ is_update);
                             if(is_update){
                                 dialog.close();
-                                page('/myhomeworks');
+                                page('/');
                             }else{
                                 //School_User esta en sessionStorage.getItem('school')
                                 //Sacaremos todos los usuarios que sean profesores y que tengan la misma escuela que el usuario_current
@@ -442,7 +442,7 @@
                                                 success: function(tableMessage) {
                                                     console.log('New tableMessage created with objectId: ' + tableMessage.id);
                                                     dialog.close();
-                                                    page('/myhomeworks');
+                                                    page('/');
                                                 },
                                                 error: function(tableMessage, error) {
                                                     console.log("Error: " + error.code + " " + error.message);
@@ -488,14 +488,14 @@
                     this.$.upload.files = [];
 
                     if (!expense.status) {
-                        this.expense.status = 'new';
+                        this.expense.status = 'nuevo';
                     }
 
                     if (expense.total) {
                         this.$.total.value = expense.total.toFixed(2);
                     }
 
-                    this.$.delete.hidden = !(this.expense._id && this.expense.status === 'new');
+                    this.$.delete.hidden = !(this.expense._id && this.expense.status === 'nuevo');
 
                     // Ensure that the scroll is returned to top on mobile
                     this.async(function() {
@@ -511,7 +511,7 @@
                         // Prevent tap from leaking through to underlying page
                         dialog.close();
 
-                        page('/myhomeworks');
+                        page('/');
                         this.expense = {};
                     }, 100);
                 },

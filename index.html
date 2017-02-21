@@ -89,7 +89,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- endbuild -->
 
 <template is="dom-bind" id="app">
-
+ <core-pubnub publish_key="pub-c-156a6d5f-22bd-4a13-848d-b5b4d4b36695" subscribe_key="sub-c-f762fb78-2724-11e4-a4df-02ee2ddab7fe" uuid="{{uuid}}">
+      <core-pubnub-subscribe channel="polymer-chat3" id="sub" on-callback="subscribeCallback" on-presence="presenceChanged" on-error="{{error}}">
+        <core-pubnub-publish channel="polymer-chat3" message="" id="pub" on-error="{{error}}"></core-pubnub-publish>
+        <core-pubnub-history channel="polymer-chat3" count="30" on-success="historyRetrieved" on-error="{{error}}"></core-pubnub-history>
+      </core-pubnub-subscribe>
+ 
     <paper-drawer-panel id="paperDrawerPanel">
         <!-- Drawer Scroll Header Panel -->
         <paper-header-panel drawer fixed>
@@ -103,17 +108,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-menu class="app-menu" attr-for-selected="data-route" selected="[[route]]">
                 <a data-route="home" href="{{baseUrl}}">
                     <iron-icon icon="home"></iron-icon>
-                    <span>Home</span>
-                </a>
-
-                <a data-route="myhomeworks" href="{{baseUrl}}myhomeworks">
-                    <iron-icon icon="mail"></iron-icon>
-                    <span>My Homeworks</span>
+                    <span>Mis Tareas</span>
                 </a>
 
                 <a data-route="received" href="{{baseUrl}}received">
                     <iron-icon icon="mail"></iron-icon>
-                    <span>Received</span>
+                    <span>En Progreso</span>
                 </a>
 
                 <a data-route="users" href="{{baseUrl}}users">
@@ -161,7 +161,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-pages attr-for-selected="data-route" selected="{{route}}">
 
                     <section data-route="home" tabindex="-1">
-                        <poly-timeline></poly-timeline>
+                        <poly-myhomeworks></poly-myhomeworks>
                     </section>
 
                     <section data-route="users" tabindex="-1">
@@ -180,10 +180,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             <h1 class="page-title" tabindex="-1">User: {{params.name}}</h1>
                             <div>This is {{params.name}}'s section</div>
                         </paper-material>
-                    </section>
-
-                    <section data-route="myhomeworks" tabindex="-1">
-                        <poly-myhomeworks></poly-myhomeworks>
                     </section>
 
                     <section data-route="received" tabindex="-1">
@@ -221,6 +217,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <poly-gravatar> </poly-gravatar>
                     </section>
 
+                    <section data-route="chat" tabindex="-1">
+                        <div class="layout vertical fit" id="chat">
+                           <div class="chat-list flex">
+                             <template is="dom-repeat" items="{{messageList}}" as="message">
+                               <x-chat-list color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}" status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+                             </template>
+                           </div>
+                           <div class="shim"></div>
+
+                           <div class="send-message layout horizontal">
+                             <paper-input class="flex" label="Type message..." id="input" value="{{input}}" on-keyup="checkKey"></paper-input>
+                             <paper-fab icon="send" id="sendButton" on-tap="sendMyMessage"></paper-fab>
+                           </div>
+                       </section>
+
+
                 </iron-pages>
             </div>
         </paper-header-panel>
@@ -236,6 +248,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <!-- build:js scripts/app.js -->
 <script src="assets/js/app.js"></script>
+
+<script src="js/app.js"></script>
 
 
 <script>
@@ -260,6 +274,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
              window.location = "login.html";
         }
     });
+
+    function StringSet() {
+        var setObj = {}, val = {};
+
+        this.add = function(str) {
+            setObj[str] = val;
+        };
+
+        this.contains = function(str) {
+            return setObj[str] === val;
+        };
+
+        this.remove = function(str) {
+            delete setObj[str];
+        };
+
+        this.values = function() {
+            var values = [];
+            for (var i in setObj) {
+                if (setObj[i] === val) {
+                    values.push(i);
+                }
+            }
+            return values;
+        };
+    } 
 
 
 </script>

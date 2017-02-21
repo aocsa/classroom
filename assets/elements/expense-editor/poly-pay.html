@@ -1,4 +1,4 @@
-
+ 
 <dom-module id="poly-pay">
     <template>
         <style>
@@ -164,11 +164,12 @@
                 <div class="form">
                     <form is="iron-form" id="form">
                         <iron-a11y-keys keys="enter" on-keys-pressed="_save"></iron-a11y-keys>
-                        <vaadin-combo-box name="professor" id="professor" items="[[professors]]" value="{{expense.professor}}" label="Professor" allow-custom-value required></vaadin-combo-box>
+                        
+                        <vaadin-combo-box class="elements-box" id = "elements-box" label="Professor" item-label-path="professor"
+                        ></vaadin-combo-box>
+                        <p>Total: $<span id="element-name"></span>.</p>
+                        
                         <paper-input name="merchant" id="merchant" value="{{expense.title}}" label="Title" allow-custom-value required readonly></paper-input>
-                        <paper-input name="total" id="total" value="{{expense.total}}" type="number" max="10000" label="Total" required step="any" readonly>
-                           <div prefix>$</div>
-                       </paper-input>
 
                         <vaadin-date-picker label="Deadline" value="{{expense.deadline}}" id="date" name="date" required readonly></vaadin-date-picker>
                         <paper-textarea id="comment" name="comment" label="Description" value="{{expense.description}}" readonly></paper-textarea>
@@ -192,7 +193,7 @@
             <div class="buttons-layout">
                 <paper-button raised on-tap="_save" class="save-button">Accept</paper-button>
                 <paper-button on-tap="close" class="cancel-button">Cancel</paper-button>
-                <paper-button on-tap="_delete" id="delete" class="delete-button">Delete</paper-button>
+                <paper-button on-tap="_delete" id="delete" class="delete-button" hidden>Delete</paper-button>
             </div>
             <span id="error" hidden$="[[!errorMessage]]">{{errorText}}</span>
         </paper-dialog>
@@ -234,6 +235,8 @@
                 ready: function() {
                     this.$.upload.set('i18n.dropFiles.one', 'Drop receipt here...');
                     this.$.upload.set('i18n.addFiles.one', 'Select receipt');
+
+                    
                 },
 
                 attached: function() {
@@ -351,7 +354,7 @@
                     this.$.error.innerText = '';
                     var form = this.$.form;
                     if (form.validate()) {
-                        this.expense.total = parseFloat(this.expense.total);
+                        //this.expense.total = parseFloat(this.expense.total);
                         this._saveExpense(this.expense);
 
                         console.log("Form Valido!! ");//_saveExpense aun no termina al llamarse esta linea
@@ -376,7 +379,9 @@
                    user_sender.id = sessionStorage.getItem('id');
 
                    var user_receiver = new UserClass();
-                   user_receiver.id =  expense.sender_user_id;
+
+                   var combobox =  document.querySelector('#elements-box');
+                   user_receiver.id =     combobox.selectedItem.sender_user_id;
 
                    var TableMessage = Parse.Object.extend("Message");
                    var tableMessage = new TableMessage();
@@ -407,6 +412,7 @@
                    var HomeworkClass = Parse.Object.extend("Homework");
                    var homework = new HomeworkClass();
                    homework.id = expense._id;
+                   homework.set('status','en progreso');
 
                    tableMessage.set("homework", homework);
 
@@ -432,6 +438,20 @@
                     // Create a copy of the expense to be edited so we don't automatically flush changes to db
                     this.expense = JSON.parse(JSON.stringify(expense));
 
+                    /*var elementsJson = [ {name: 'Hydrogen', symbol: 'H', number: 1},
+                                            {name: 'Helium', symbol: 'He', number: 2},
+                                            {name: 'Lithium', symbol: 'Li', number: 3}];*/
+
+                    var combobox = combobox || document.querySelector('#elements-box');
+
+                    // elementsJson is an Array of Objects. Item object format:
+                    //   {name: 'Hydrogen', symbol: 'H', number: 1}
+                    combobox.items = expense.elementos;
+
+                    combobox.addEventListener('selected-item-changed', function() {
+                    document.querySelector('#element-name').innerHTML = combobox.selectedItem && combobox.selectedItem.total;
+                    });
+
 
                     // File objects don't survive the JSON dance, so copy that over manually
                     if (expense._attachments) {
@@ -449,11 +469,11 @@
                         this.expense.status = 'new';
                     }
 
-                    if (expense.total) {
+                   /* if (expense.total) {
                         this.$.total.value = expense.total.toFixed(2);
-                    }
+                    }*/
 
-                    this.$.delete.hidden = !(this.expense._id && this.expense.status === 'new');
+                    //this.$.delete.hidden = !(this.expense._id && this.expense.status === 'new');
 
                     // Ensure that the scroll is returned to top on mobile
                     this.async(function() {

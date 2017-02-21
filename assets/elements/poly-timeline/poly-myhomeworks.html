@@ -65,12 +65,12 @@
                 flex-direction: row-reverse;
             }
 
-            vaadin-grid /deep/ td.status-new {
+            vaadin-grid /deep/ td.status-nuevo {
                 color: var(--accent-color);
                 font-weight: 500;
             }
 
-            vaadin-grid /deep/ td.status-in_progress {
+            vaadin-grid /deep/ td.status-cotizado {
                 font-weight: 500;
                 font-style: italic;
                 text-transform: capitalize;
@@ -167,7 +167,7 @@
                             grid.getItem(selection[0], function(err, item) {
                                 //this.fire('edit-expense', item);
                                 localStorage.setItem("expense", JSON.stringify(item));
-                                page('/editor');
+                                page('/editorhome');
                             }.bind(this));
                         }
                     }.bind(this));
@@ -217,14 +217,14 @@
                             for (var i = 0; i < results.length; i++) {
                                 var object = results[i];
                                 //itemsArray.push({_id:object.id, date: object.get('Date'), merchant: object.get('Merchant'), total: object.get('Total'), status: 'New', comment: object.get('Comment')});
-
-                                itemsArray.push({_id:object.id,
-                                    deadline: object.get('deadline'),
-                                    title: object.get('title'),
-                                    status: object.get('status'),
-                                    description: object.get('description'),
-                                    _attachments: {receipt: object.get('attachment')} });
-
+                                if(object.get('status')!='en progreso'){
+                                    itemsArray.push({_id:object.id,
+                                        deadline: object.get('deadline'),
+                                        title: object.get('title'),
+                                        status: object.get('status'),
+                                        description: object.get('description'),
+                                        _attachments: {receipt: object.get('attachment')} });
+                                }
                                 //console.log(object.id + ' - ' + object.get('Date'));
                                 //this.expenses.addRow(object.get('Date'),object.get('Merchant'),object.get('Comment'),object.get('Total'),'status',object.get('Comment'));
                             }
@@ -255,7 +255,7 @@
                             grid.getItem(selection[0], function(err, item) {
 
                                 //this.fire('edit-expense', item);
-                                page('/editor');
+                                page('/editorhome');
 
                             }.bind(this));
                         }

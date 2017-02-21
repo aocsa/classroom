@@ -65,11 +65,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             setFocus(app.route);
         });
 
-        page('/myhomeworks', function() {
-            app.route = 'myhomeworks';
-            setFocus(app.route);
-        });
-
         page('/received', function() {
             app.route = 'received';
             setFocus(app.route);
@@ -117,6 +112,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             expenseEditor.open(localObj);
 
         });
+
+        page('/chat', function() {
+           app.route = 'chat';
+           setFocus(app.route);
+       });
+
         // 404
         page('*', function() {
             app.$.toast.text = 'Can\'t find: ' + window.location.href  + '. Redirected you to Home Page';
