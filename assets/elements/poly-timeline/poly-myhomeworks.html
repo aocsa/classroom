@@ -147,6 +147,11 @@
                     '_update(sortColumn)',
                     '_update(sortDirection)'
                 ],
+                listeners: {
+                  //'edit-expense': '_editExpense',
+                  'expenses-refresh': '_expensesUpdated'
+                
+                },
 
                 ready: function() {
                     var grid = this.$.expenses;
@@ -197,9 +202,25 @@
 
                         grid.header.getCell(0, 2).className = 'total';
                     });
-
+                   
+                  pubnub.addListener({
+                        message: function (m) {
+                            if (m.message.foo === 'update-list') {
+                                   // this.$.fire('expenses-refresh');
+                                //pubnub.fire('expenses-refresh');
+                                app.$.myhomeworks._expensesUpdated();
+                        
+                      
+                            }                            
+                        }
+                    });
                 },
-
+                _expensesUpdated : function () {
+                    var grid = this.$.expenses;
+                    grid.items = [];
+                    this.llenarExpenses(grid);
+                    console.log('termino ready');
+                },
                 llenarExpenses: function(grid){
                     var TableExpense = Parse.Object.extend("Homework");
                     var query = new Parse.Query(TableExpense);

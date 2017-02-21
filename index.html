@@ -55,10 +55,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <script src="bower_components/parse/parse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/quickblox/2.5.0/quickblox.min.js"></script>
-
-
-
+    
+   
     <link rel="stylesheet" is="custom-style"
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" is="custom-style" href="bower_components/font-awesome/css/font-awesome.css">
@@ -161,7 +159,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-pages attr-for-selected="data-route" selected="{{route}}">
 
                     <section data-route="home" tabindex="-1">
-                        <poly-myhomeworks></poly-myhomeworks>
+                        <poly-myhomeworks id="myhomeworks" ></poly-myhomeworks>
                     </section>
 
                     <section data-route="users" tabindex="-1">
@@ -250,6 +248,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script src="assets/js/app.js"></script>
 
 <script src="js/app.js"></script>
+   <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.4.4.js"></script>
 
 
 <script>
@@ -301,6 +300,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
     } 
 
+  
+
+   var pubnub = new PubNub({
+        publishKey : 'pub-c-467437f5-5346-4f8c-9ddf-2de1c90a93c8',
+        subscribeKey : 'sub-c-52679430-efef-11e6-b753-0619f8945a4f'
+    })
+    pubnub.subscribe({ channels: ['chatChannel'] })
 
 </script>
 <!-- endbuild-->

@@ -166,4 +166,7 @@
   template._backgroundImage = function(avatar) {
       return 'background-image: url('+avatar+');';
   };
+  //
+
+
 })();
