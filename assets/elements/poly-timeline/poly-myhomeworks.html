@@ -205,7 +205,7 @@
                    
                   pubnub.addListener({
                         message: function (m) {
-                            if (m.message.foo === 'update-list') {
+                            if (m.message.foo === 'update-list' && m.message.sender=== sessionStorage.getItem('id')) {
                                    // this.$.fire('expenses-refresh');
                                 //pubnub.fire('expenses-refresh');
                                 app.$.myhomeworks._expensesUpdated();

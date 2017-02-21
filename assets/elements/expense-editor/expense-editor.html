@@ -440,6 +440,7 @@
                                             tableMessage.set("receiver", user_receiver);
                                             tableMessage.set("cost", 0);
                                             tableMessage.set("homework", tableExpenseData);
+                                            
                                             tableMessage.save(null, {
                                                 success: function(tableMessage) {
                                                     console.log('New tableMessage created with objectId: ' + tableMessage.id);
@@ -449,7 +450,7 @@
                                                              page('/');
                                                             pubnub.publish({
                                                                 channel: 'chatChannel',
-                                                                message: { foo : 'update-list' }
+                                                                message: { foo : 'update-list',sender: user_sender.id , school: user_receiver.get("school")}
                                                             }, function ( status, response ) {
                                                                 console.log( status.error, response );
                                                             });
