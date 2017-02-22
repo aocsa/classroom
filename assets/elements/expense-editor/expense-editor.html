@@ -45,6 +45,12 @@
                 background: var(--primary-color);
                 color: var(--text-primary-color);
             }
+            .save-button[disabled],
+            .save-button.disabled {
+                color: #FFFFFF;
+                background: #82B1FF;
+                border: 1px solid #CCC;
+            }
 
             .cancel-button {
                 color: var(--primary-color);
@@ -184,7 +190,7 @@
                 </div>
             </div>
             <div class="buttons-layout">
-                <paper-button raised on-tap="_save" class="save-button">Save</paper-button>
+                <paper-button raised on-tap="_save" class="save-button" id="saveButton">Save</paper-button>
                 <paper-button on-tap="close" class="cancel-button">Cancel</paper-button>
                 <paper-button on-tap="_delete" id="delete" class="delete-button">Delete</paper-button>
             </div>
@@ -352,16 +358,7 @@
                     if (form.validate()) {
                         this.expense.total = parseFloat(this.expense.total);
                         this._saveExpense(this.expense);
-
-                         
-
                         console.log("Form Valido!! ");//_saveExpense aun no termina al llamarse esta linea
-                        /*this.$.gridv.push('items', {_id:'id',
-                                    deadline: '2017-10-10',
-                                    title: 'object.get()',
-                                    status: 'new',
-                                    description: 'object.get()' });*/
-
                     }
                     else{
                         console.log("Form NO valido ");
@@ -374,6 +371,7 @@
                     var TableExpense = Parse.Object.extend("Homework");
                     var tableExpenseData = new TableExpense();
 
+                    
                     // crud:update code
                     var localObj = JSON.parse(localStorage.getItem("expense")); // recover item from table list
                     var is_update = false;
@@ -405,6 +403,7 @@
                         tableExpenseData.set("attachment", parseFile);
                     }
                     
+                    this.$.saveButton.disabled = true;
                     tableExpenseData.save(null, {
                         success: function(tableExpense) {
                             // Execute any logic that should take place after the object is saved.
@@ -488,7 +487,8 @@
 
                     // Create a copy of the expense to be edited so we don't automatically flush changes to db
                     this.expense = JSON.parse(JSON.stringify(expense));
-
+                    
+                    this.$.saveButton.disabled = false;
 
                     // File objects don't survive the JSON dance, so copy that over manually
                     if (expense._attachments) {

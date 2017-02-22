@@ -45,6 +45,12 @@
                 background: var(--primary-color);
                 color: var(--text-primary-color);
             }
+            .save-button[disabled],
+            .save-button.disabled {
+                color: #FFFFFF;
+                background: #82B1FF;
+                border: 1px solid #CCC;
+            }
 
             .cancel-button {
                 color: var(--primary-color);
@@ -191,7 +197,7 @@
                 </div>
             </div>
             <div class="buttons-layout">
-                <paper-button raised on-tap="_save" class="save-button">Accept</paper-button>
+                <paper-button raised on-tap="_save" class="save-button" id="saveButton">Accept</paper-button>
                 <paper-button on-tap="close" class="cancel-button">Cancel</paper-button>
                 <paper-button on-tap="_delete" id="delete" class="delete-button" hidden>Delete</paper-button>
             </div>
@@ -358,11 +364,6 @@
                         this._saveExpense(this.expense);
 
                         console.log("Form Valido!! ");//_saveExpense aun no termina al llamarse esta linea
-                        /*this.$.gridv.push('items', {_id:'id',
-                                    deadline: '2017-10-10',
-                                    title: 'object.get()',
-                                    status: 'new',
-                                    description: 'object.get()' });*/
 
                     }
                     else{
@@ -415,12 +416,19 @@
                    homework.set('status','en progreso');
 
                    tableMessage.set("homework", homework);
-
+                   this.$.saveButton.disabled = true;
                    tableMessage.save(null, {
                        success: function(tableMessage) {
                            console.log('New tableMessage created with objectId: ' + tableMessage.id);
                            dialogpay.close();
                            page('/received');
+
+                           pubnub.publish({
+                                channel: 'chatChannel',
+                                message: {foo: 'update-statusProgress', sender_id: sessionStorage.getItem('id'), receiver_id: user_receiver.id }
+                            },function(status, response){
+                                console.log(status.error, response);
+                            });
                        },
                        error: function(tableMessage, error) {
                            console.log("Error: " + error.code + " " + error.message);
@@ -438,9 +446,7 @@
                     // Create a copy of the expense to be edited so we don't automatically flush changes to db
                     this.expense = JSON.parse(JSON.stringify(expense));
 
-                    /*var elementsJson = [ {name: 'Hydrogen', symbol: 'H', number: 1},
-                                            {name: 'Helium', symbol: 'He', number: 2},
-                                            {name: 'Lithium', symbol: 'Li', number: 3}];*/
+                    this.$.saveButton.disabled = false;
 
                     var combobox = combobox || document.querySelector('#elements-box');
 

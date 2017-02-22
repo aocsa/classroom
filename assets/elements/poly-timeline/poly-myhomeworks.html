@@ -209,9 +209,14 @@
                                    // this.$.fire('expenses-refresh');
                                 //pubnub.fire('expenses-refresh');
                                 app.$.myhomeworks._expensesUpdated();
-                        
-                      
-                            }                            
+                            }else{
+                                if(m.message.foo === 'update-status' && m.message.receiver_id === sessionStorage.getItem('id')){
+                                    app.$.myhomeworks._expensesUpdated();
+                                    app.$.toast.text ='Nueva tarea cotizada!!';
+                                    app.$.toast.show();
+                                }
+                            }
+
                         }
                     });
                 },

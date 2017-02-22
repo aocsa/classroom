@@ -148,6 +148,12 @@
                     '_update(sortDirection)'
                 ],
 
+                listeners: {
+                  //'edit-expense': '_editExpense',
+                  'expenses-refresh': '_expensesUpdated'
+                
+                },
+
                 _test: function(){
                     // Declare the types.
                     var Post = Parse.Object.extend("Homework");
@@ -229,6 +235,26 @@
 
                         grid.header.getCell(0, 2).className = 'total';
                     });
+
+                    pubnub.addListener({
+                        message: function (m) {
+                                if(m.message.foo === 'update-status' && m.message.receiver_id === sessionStorage.getItem('id')){
+                                    app.$.myreceived._expensesUpdated();
+                                }
+                                else{
+                                    if(m.message.foo === 'update-statusProgress' && m.message.sender_id === sessionStorage.getItem('id')){
+                                        app.$.myreceived._expensesUpdated();
+                                    }
+                                }
+                        }
+                    });
+                
+                },
+
+                _expensesUpdated : function () {
+                    var grid = this.$.expenses;
+                    grid.items = [];
+                    this.llenarReceived(grid);
                 },
 
                 llenarReceived: function(grid){
