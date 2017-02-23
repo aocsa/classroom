@@ -164,13 +164,13 @@
             <div class="wrapper">
                 <div class="form">
                     <form is="iron-form" id="form">
-                        <paper-input name="merchant" id="merchant" value="{{expense.title}}" label="Title" allow-custom-value required readonly></paper-input>
+                        <paper-input name="merchant" id="merchant" value="{{expense.titulo}}" label="Titulo" allow-custom-value required readonly></paper-input>
                         <paper-input name="total" id="total" value="{{expense.total}}" type="number" max="10000" label="Total" required step="any" hidden>
                            <div prefix>$</div>
                        </paper-input>
 
                         <vaadin-date-picker label="Deadline" value="{{expense.deadline}}" id="date" name="date" required readonly></vaadin-date-picker>
-                        <paper-textarea id="comment" name="comment" label="Description" value="{{expense.description}}" readonly></paper-textarea>
+                        <paper-textarea id="comment" name="comment" label="Descripción" value="{{expense.descripcion}}" readonly></paper-textarea>
                     </form>
                 </div>
                 <div class="receipt">
@@ -243,11 +243,11 @@
                 },
 
                 _getCaption: function(expense) {
-                    return 'Homework';
+                    return 'Tarea';
                 },
 
                 _showReceipt: function() {
-                    return this.expense._id && this.expense.status !== 'new' ||
+                    return this.expense._id && this.expense.estado !== 'nuevo' ||
                         this.expense._attachments && this.expense._attachments.receipt;
                 },
 
@@ -334,13 +334,13 @@
                         this.set('expense._attachments', expense._attachments);
                     }
 
-                    this.set('expense.title', '');
-                    if (expense.title) {
-                        this.set('expense.title', expense.title);
+                    this.set('expense.titulo', '');
+                    if (expense.titulo) {
+                        this.set('expense.titulo', expense.titulo);
                     }
 
-                    if (!expense.status) {
-                        this.expense.status = 'new';
+                    if (!expense.estado) {
+                        this.expense.estado = 'nuevo';
                     }
 
                     if (expense.total) {

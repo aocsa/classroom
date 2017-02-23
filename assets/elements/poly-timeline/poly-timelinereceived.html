@@ -70,17 +70,18 @@
                 font-weight: 500;
             }
 
-            vaadin-grid /deep/ td.status-cotizado {
+            vaadin-grid /deep/ td.estado-cotizado {
                 font-weight: 500;
+                color: #FFC107;
                 font-style: italic;
                 text-transform: capitalize;
             }
 
-            vaadin-grid /deep/ td.comment {
+            vaadin-grid /deep/ td.descripcion {
                 position: relative;
             }
 
-            vaadin-grid /deep/ td.comment span {
+            vaadin-grid /deep/ td.descripcion span {
                 width: 100%;
 
                 position: absolute;
@@ -118,9 +119,9 @@
             <table>
                 <colgroup>
                     <col name="deadline" width="135" sortable sort-direction="desc" />
-                    <col name="title" flex="1" min-width="130" sortable/>
-                    <col name="status" width="120" sortable/>
-                    <col name="description" flex="2" min-width="260" sortable/>
+                    <col name="titulo" flex="1" min-width="130" sortable/>
+                    <col name="estado" width="120" sortable/>
+                    <col name="descripcion" flex="2" min-width="260" sortable/>
                 </colgroup>
             </table>
         </vaadin-grid>
@@ -154,29 +155,6 @@
                 
                 },
 
-                _test: function(){
-                    // Declare the types.
-                    var Post = Parse.Object.extend("Homework");
-                    var Comment = Parse.Object.extend("Comment");
-
-                    // Create the post
-                    var myPost = new Post();
-                    myPost.set("title", 'expense.title');
-                    myPost.set("deadline", '2017-10-10');
-                    myPost.set("description", 'expense.description');
-                    myPost.set("userid", 'idfalse');
-
-                    // Create the comment
-                    var myComment = new Comment();
-                    myComment.set("content", "Let's do Sushirrito.");
-
-                    // Add the post as a value in the comment
-                    myComment.set("parent", myPost);
-
-                    // This will save both myPost and myComment
-                    myComment.save();
-                },
-
                 ready: function() {
                     var grid = this.$.expenses;
                     grid.items = [];
@@ -198,7 +176,7 @@
                         if (selection.length === 1) {
                             grid.getItem(selection[0], function(err, item) {
                                 //this.fire('edit-expense', item);
-                                if(item.status=='en progreso'){
+                                if(item.estado=='en progreso'){
                                     localStorage.setItem("sender", JSON.stringify(item));
                                      page('/chat');
                                 
@@ -211,12 +189,12 @@
                     }.bind(this));
 
                     grid.cellClassGenerator = function(cell) {
-                        if (cell.columnName === 'status') {
-                            return 'status-' + cell.data.replace(/ /g, '-').toLowerCase();
+                        if (cell.columnName === 'estado') {
+                            return 'estado-' + cell.data.replace(/ /g, '-').toLowerCase();
                         } else if (cell.columnName === 'total') {
                             return 'total';
-                        } else if (cell.columnName === 'comment') {
-                            return 'comment';
+                        } else if (cell.columnName === 'descripcion') {
+                            return 'descripcion';
                         }
                     };
 
@@ -290,10 +268,10 @@
                                         setClass.add(hid);
                                         itemsArray.push({_id:object.get('homework').id,
                                                     deadline: object.get('homework').get('deadline'),
-                                                    title: object.get('homework').get('title'),
+                                                    titulo: object.get('homework').get('title'),
                                                     total: object.get('cost'),
-                                                    status: object.get('homework').get('status'),
-                                                    description: object.get('homework').get('description'),
+                                                    estado: object.get('homework').get('status'),
+                                                    descripcion: object.get('homework').get('description'),
                                                     homework_user_id: object.get('homework').get('homework_user').id,
                                                     sender_user_id: object.get('sender').id,
                                                     professor: object.get('sender').get('name'),
@@ -307,6 +285,9 @@
 
                            for (var i = 0 ; i < itemsArray.length; i++) {
                                 itemsArray[i].elementos = profesores[ itemsArray[i]._id  ] ;
+                                if(itemsArray[i].elementos.length>1){
+                                    itemsArray[i].titulo = '(' + itemsArray[i].elementos.length +')' + itemsArray[i].titulo;
+                                }
                            }
                            console.log(itemsArray);
                            grid.items = itemsArray;
@@ -342,12 +323,12 @@
                     }.bind(this));
 
                     grid.cellClassGenerator = function(cell) {
-                        if (cell.columnName === 'status') {
-                            return 'status-' + cell.data.replace(/ /g, '-').toLowerCase();
+                        if (cell.columnName === 'estado') {
+                            return 'estado-' + cell.data.replace(/ /g, '-').toLowerCase();
                         } else if (cell.columnName === 'total') {
                             return 'total';
-                        } else if (cell.columnName === 'comment') {
-                            return 'comment';
+                        } else if (cell.columnName === 'descripcion') {
+                            return 'descripcion';
                         }
                     };
 
@@ -404,18 +385,12 @@
                     // Filter
                     var result = this.expenses
                         .filter(function(expense) {
-                            return !(merchant && expense.title
+                            return !(merchant && expense.titulo
                                 .toUpperCase().indexOf(merchant.toUpperCase()) < 0);
                         })
-                        /*.filter(function(expense) {
-                            return !(min && expense.total < min);
-                        })
-                        .filter(function(expense) {
-                            return !(max && expense.total > max);
-                        })*/
                         .filter(function(expense) {
                             if (status && status.length > 0) {
-                                return status.indexOf(expense.status) >= 0;
+                                return status.indexOf(expense.estado) >= 0;
                             } else {
                                 return false;
                             }

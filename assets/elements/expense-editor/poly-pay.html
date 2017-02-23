@@ -171,34 +171,36 @@
                     <form is="iron-form" id="form">
                         <iron-a11y-keys keys="enter" on-keys-pressed="_save"></iron-a11y-keys>
                         
-                        <vaadin-combo-box class="elements-box" id = "elements-box" label="Professor" item-label-path="professor"
+                        <vaadin-combo-box class="elements-box" id = "elements-box" label="Profesor" item-label-path="professor"
                         ></vaadin-combo-box>
                         <p>Total: $<span id="element-name"></span>.</p>
                         
-                        <paper-input name="merchant" id="merchant" value="{{expense.title}}" label="Title" allow-custom-value required readonly></paper-input>
+                        <paper-input name="merchant" id="merchant" value="{{expense.titulo}}" label="Titulo" allow-custom-value required readonly></paper-input>
 
                         <vaadin-date-picker label="Deadline" value="{{expense.deadline}}" id="date" name="date" required readonly></vaadin-date-picker>
-                        <paper-textarea id="comment" name="comment" label="Description" value="{{expense.description}}" readonly></paper-textarea>
-                    </form>
-                </div>
-                <div class="receipt">
-                    <vaadin-upload id="upload" accept="image/*" max-files="1" on-upload-before="_handleUpload" required>
-                        <div class="file-list">
-                            <div class="receipt-wrapper">
-                                <img src$="[[_receiptURL]]" alt="Receipt" hidden$="[[!_showReceipt(expense._attachments.*)]]">
+                        <paper-textarea id="comment" name="comment" label="Descripcion" value="{{expense.descripcion}}" readonly></paper-textarea>
+                    
+                        <div class="receipt">
+                        <vaadin-upload id="upload" accept="image/*" max-files="1" on-upload-before="_handleUpload" required>
+                            <div class="file-list">
+                                <div class="receipt-wrapper">
+                                    <img src$="[[_receiptURL]]" alt="Receipt" hidden$="[[!_showReceipt(expense._attachments.*)]]">
+                                </div>
                             </div>
-                        </div>
-                    </vaadin-upload>
+                        </vaadin-upload>
 
-                     <paper-input name="transaction" id="transaction" value="{{expense.transaction}}"   max="10000" label="Transaction" required step="any">
-                           <div prefix>$</div>
-                       </paper-input>
+                        <paper-input name="transaction" id="transaction" value="{{expense.transaction}}"   max="10000" label="Transacción" required step="any">
+                            <div prefix>N°</div>
+                        </paper-input>
 
+                    </div>
+                    </form>
                 </div>
             </div>
             <div class="buttons-layout">
-                <paper-button raised on-tap="_save" class="save-button" id="saveButton">Accept</paper-button>
-                <paper-button on-tap="close" class="cancel-button">Cancel</paper-button>
+                <paper-button raised on-tap="_save" class="save-button" id="saveButton">Aceptar</paper-button>
+                <paper-spinner id='spinnerSave'></paper-spinner>
+                <paper-button on-tap="close" class="cancel-button">Cancelar</paper-button>
                 <paper-button on-tap="_delete" id="delete" class="delete-button" hidden>Delete</paper-button>
             </div>
             <span id="error" hidden$="[[!errorMessage]]">{{errorText}}</span>
@@ -239,10 +241,8 @@
                 observers: ['_updateReceiptURL(expense._attachments.*)'],
 
                 ready: function() {
-                    this.$.upload.set('i18n.dropFiles.one', 'Drop receipt here...');
-                    this.$.upload.set('i18n.addFiles.one', 'Select receipt');
-
-                    
+                    this.$.upload.set('i18n.dropFiles.one', 'Arrastra el archivo aqui...');
+                    this.$.upload.set('i18n.addFiles.one', 'Seleccionar archivo');
                 },
 
                 attached: function() {
@@ -263,11 +263,11 @@
                 },
 
                 _getCaption: function(expense) {
-                    return 'Homework Received';
+                    return 'Tarea Recivida';
                 },
 
                 _showReceipt: function() {
-                    return this.expense._id && this.expense.status !== 'new' ||
+                    return this.expense._id && this.expense.estado !== 'nuevo' ||
                         this.expense._attachments && this.expense._attachments.receipt;
                 },
 
@@ -359,6 +359,13 @@
                 _save: function() {
                     this.$.error.innerText = '';
                     var form = this.$.form;
+                    var combobox =  document.querySelector('#elements-box');
+                    var selectCombobox = combobox.selectedItem;
+                    if(selectCombobox===null){
+                        app.$.toast.text = 'Elige a un Profesor!!';
+                        app.$.toast.show();
+                    }
+
                     if (form.validate()) {
                         //this.expense.total = parseFloat(this.expense.total);
                         this._saveExpense(this.expense);
@@ -371,8 +378,9 @@
                     }
                 },
                  _saveExpense: function(expense) {
-
-                   //this._db.save(expense);
+                   //Activamos el spinner para dar la sensación de carga o estado en proceso
+                    $('#spinnerSave').prop("active",true);
+                   this.$.saveButton.disabled = true;
 
                    // PARSE YA ESTA INICIALIZADO EN POLY-PROFILE
                    var UserClass = Parse.Object.extend("User");
@@ -416,7 +424,6 @@
                    homework.set('status','en progreso');
 
                    tableMessage.set("homework", homework);
-                   this.$.saveButton.disabled = true;
                    tableMessage.save(null, {
                        success: function(tableMessage) {
                            console.log('New tableMessage created with objectId: ' + tableMessage.id);
@@ -446,13 +453,16 @@
                     // Create a copy of the expense to be edited so we don't automatically flush changes to db
                     this.expense = JSON.parse(JSON.stringify(expense));
 
+                    //Quitamos la sensacion de carga o estado en proceso
                     this.$.saveButton.disabled = false;
+                    $('#spinnerSave').removeAttr("active");
 
                     var combobox = combobox || document.querySelector('#elements-box');
 
                     // elementsJson is an Array of Objects. Item object format:
                     //   {name: 'Hydrogen', symbol: 'H', number: 1}
                     combobox.items = expense.elementos;
+
 
                     combobox.addEventListener('selected-item-changed', function() {
                     document.querySelector('#element-name').innerHTML = combobox.selectedItem && combobox.selectedItem.total;
@@ -464,15 +474,15 @@
                         //this.set('expense._attachments', expense._attachments);
                     }
 
-                    this.set('expense.title', '');
-                    if (expense.title) {
-                        this.set('expense.title', expense.title);
+                    this.set('expense.titulo', '');
+                    if (expense.titulo) {
+                        this.set('expense.titulo', expense.titulo);
                     }
 
                     this.$.upload.files = [];
 
-                    if (!expense.status) {
-                        this.expense.status = 'new';
+                    if (!expense.estado) {
+                        this.expense.estado = 'new';
                     }
 
                    /* if (expense.total) {

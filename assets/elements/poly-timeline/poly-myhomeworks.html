@@ -65,13 +65,14 @@
                 flex-direction: row-reverse;
             }
 
-            vaadin-grid /deep/ td.status-nuevo {
+            vaadin-grid /deep/ td.estado-nuevo {
                 color: var(--accent-color);
                 font-weight: 500;
             }
 
-            vaadin-grid /deep/ td.status-cotizado {
+            vaadin-grid /deep/ td.estado-cotizado {
                 font-weight: 500;
+                color: #FFC107;
                 font-style: italic;
                 text-transform: capitalize;
             }
@@ -118,9 +119,9 @@
             <table>
                 <colgroup>
                     <col name="deadline" width="135" sortable sort-direction="desc" />
-                    <col name="title" flex="1" min-width="130" sortable/>
-                    <col name="status" width="120" sortable/>
-                    <col name="description" flex="2" min-width="260" sortable/>
+                    <col name="titulo" flex="1" min-width="130" sortable/>
+                    <col name="estado" width="120" sortable/>
+                    <col name="descripcion" flex="2" min-width="260" sortable/>
                 </colgroup>
             </table>
         </vaadin-grid>
@@ -178,8 +179,8 @@
                     }.bind(this));
 
                     grid.cellClassGenerator = function(cell) {
-                        if (cell.columnName === 'status') {
-                            return 'status-' + cell.data.replace(/ /g, '-').toLowerCase();
+                        if (cell.columnName === 'estado') {
+                            return 'estado-' + cell.data.replace(/ /g, '-').toLowerCase();
                         } else if (cell.columnName === 'total') {
                             return 'total';
                         } else if (cell.columnName === 'comment') {
@@ -246,9 +247,9 @@
                                 if(object.get('status')!='en progreso'){
                                     itemsArray.push({_id:object.id,
                                         deadline: object.get('deadline'),
-                                        title: object.get('title'),
-                                        status: object.get('status'),
-                                        description: object.get('description'),
+                                        titulo: object.get('title'),
+                                        estado: object.get('status'),
+                                        descripcion: object.get('description'),
                                         _attachments: {receipt: object.get('attachment')} });
                                 }
                                 //console.log(object.id + ' - ' + object.get('Date'));
@@ -288,8 +289,8 @@
                     }.bind(this));
 
                     grid.cellClassGenerator = function(cell) {
-                        if (cell.columnName === 'status') {
-                            return 'status-' + cell.data.replace(/ /g, '-').toLowerCase();
+                        if (cell.columnName === 'estado') {
+                            return 'estado-' + cell.data.replace(/ /g, '-').toLowerCase();
                         } else if (cell.columnName === 'total') {
                             return 'total';
                         } else if (cell.columnName === 'comment') {
@@ -349,7 +350,7 @@
                     // Filter
                     var result = this.expenses
                         .filter(function(expense) {
-                            return !(merchant && expense.title
+                            return !(merchant && expense.titulo
                                 .toUpperCase().indexOf(merchant.toUpperCase()) < 0);
                         })
                         /*.filter(function(expense) {
@@ -360,7 +361,7 @@
                         })*/
                         .filter(function(expense) {
                             if (status && status.length > 0) {
-                                return status.indexOf(expense.status) >= 0;
+                                return status.indexOf(expense.estado) >= 0;
                             } else {
                                 return false;
                             }
