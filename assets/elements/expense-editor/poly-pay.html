@@ -180,7 +180,10 @@
                         <vaadin-date-picker label="Deadline" value="{{expense.deadline}}" id="date" name="date" required readonly></vaadin-date-picker>
                         <paper-textarea id="comment" name="comment" label="Descripcion" value="{{expense.descripcion}}" readonly></paper-textarea>
                     
-                        <div class="receipt">
+                        
+                    </form>
+                </div>
+                <div class="receipt">
                         <vaadin-upload id="upload" accept="image/*" max-files="1" on-upload-before="_handleUpload" required>
                             <div class="file-list">
                                 <div class="receipt-wrapper">
@@ -193,9 +196,7 @@
                             <div prefix>N°</div>
                         </paper-input>
 
-                    </div>
-                    </form>
-                </div>
+                        </div>
             </div>
             <div class="buttons-layout">
                 <paper-button raised on-tap="_save" class="save-button" id="saveButton">Aceptar</paper-button>
@@ -263,7 +264,7 @@
                 },
 
                 _getCaption: function(expense) {
-                    return 'Tarea Recivida';
+                    return 'Tarea Recibida';
                 },
 
                 _showReceipt: function() {

@@ -42,7 +42,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!-- Tile icon for Win8 (144x144) -->
     <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
-    <title>P O L Y</title>
+    <title>Salvando el semestre</title>
 
 
 
@@ -74,10 +74,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         paper-fab {
             position: fixed;
         }
+        #frozen {
+            height: 300px;
+        }
 
     </style>
     <!-- For shared styles, shared-styles.html import in elements.html -->
     <style is="custom-style" include="shared-styles"></style>
+    <link rel="stylesheet" href="css/style.css">
+
+    <style is="custom-style">
+       /* Polymer elelments custom styles must be defined here */
+     </style>
 
 </head>
 
@@ -114,15 +122,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <span>En Progreso</span>
                 </a>
 
-                <a data-route="users" href="{{baseUrl}}users">
-                    <iron-icon icon="info"></iron-icon>
-                    <span>Users</span>
-                </a>
-
-                <a data-route="contact" href="{{baseUrl}}contact">
-                    <iron-icon icon="mail"></iron-icon>
-                    <span>Contact</span>
-                </a>
 
 
 
@@ -148,7 +147,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 <!-- Application name -->
                 <div class="middle middle-container">
-                    <div class="app-name">Polymer Starter Kit</div>
+                    <div class="app-name">Salvando el semestre</div>
                 </div>
 
             </paper-toolbar>
@@ -184,21 +183,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <poly-timelinereceived id="myreceived"></poly-timelinereceived>
                     </section>
 
-                    <section data-route="contact" tabindex="-1">
-                        <paper-material elevation="1">
-                            <h1 class="page-title" tabindex="-1">Contact</h1>
-                            <p>This is the contact section</p>
-
-                        </paper-material>
-                    </section>
-
-                    <section data-route="map" tabindex="-1">
-                        <paper-material elevation="1">
-                            <h1 class="page-title" tabindex="-1">Map</h1>
-                            <p>This is the map section</p>
-                        </paper-material>
-                    </section>
-
                     <section data-route="editor" tabindex="-1">
                         <expense-editor id="expenseEditor" ></expense-editor>
                     </section>
@@ -220,7 +204,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <div class="layout vertical fit" id="chat">
                            <div class="chat-list flex">
                              <template is="dom-repeat" items="{{messageList}}" as="message">
-                               <x-chat-list color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}" status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+                               <x-chat-list color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid_real}}" text="{{message.text}}" status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
                              </template>
                            </div>
                            <div class="shim"></div>
@@ -300,14 +284,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return values;
         };
     } 
-
-  
-
    var pubnub = new PubNub({
         publishKey : 'pub-c-467437f5-5346-4f8c-9ddf-2de1c90a93c8',
         subscribeKey : 'sub-c-52679430-efef-11e6-b753-0619f8945a4f'
     })
     pubnub.subscribe({ channels: ['chatChannel'] })
+
+
 
 </script>
 <!-- endbuild-->

@@ -77,11 +77,11 @@
                 text-transform: capitalize;
             }
 
-            vaadin-grid /deep/ td.comment {
+            vaadin-grid /deep/ td.descripcion {
                 position: relative;
             }
 
-            vaadin-grid /deep/ td.comment span {
+            vaadin-grid /deep/ td.descripcion span {
                 width: 100%;
 
                 position: absolute;
@@ -119,8 +119,8 @@
             <table>
                 <colgroup>
                     <col name="deadline" width="135" sortable sort-direction="desc" />
-                    <col name="titulo" flex="1" min-width="130" sortable/>
-                    <col name="estado" width="120" sortable/>
+                    <col name="titulo" flex="1" min-width="130" max-width="150" sortable/>
+                    <col name="estado" width="100" sortable/>
                     <col name="descripcion" flex="2" min-width="260" sortable/>
                 </colgroup>
             </table>
@@ -183,8 +183,8 @@
                             return 'estado-' + cell.data.replace(/ /g, '-').toLowerCase();
                         } else if (cell.columnName === 'total') {
                             return 'total';
-                        } else if (cell.columnName === 'comment') {
-                            return 'comment';
+                        } else if (cell.columnName === 'descripcion') {
+                            return 'descripcion';
                         }
                     };
 
@@ -215,6 +215,11 @@
                                     app.$.myhomeworks._expensesUpdated();
                                     app.$.toast.text ='Nueva tarea cotizada!!';
                                     app.$.toast.show();
+                                }
+                                if(m.message.foo === 'update-statusProgress' && m.message.sender_id === sessionStorage.getItem('id')){
+                                        app.$.myhomeworks._expensesUpdated();
+                                        app.$.toast.text ='Nueva tarea en progreso!!';
+                                        app.$.toast.show();
                                 }
                             }
 

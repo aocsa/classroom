@@ -10,7 +10,7 @@
   };
 
   var randomCat = function() {
-    var cats = ['professor'];
+    var cats = ['estudiante'];
     return cats[(Math.random() * cats.length) >>> 0];
   };
 
@@ -62,7 +62,7 @@
       if (  l.uuid.indexOf (localObj._id) == -1 ){
         return;
       }
-      var catName = (l.uuid + '').split('-')[1];
+      var catName = (l.uuid + '').split('-')[2];
       l.avatar = 'images/' + catName + '.jpg';
 
       if (catName === undefined || /\s/.test(l.uuid)) {
@@ -116,7 +116,8 @@
       if(d.uuid.length > 35) { // pubnub admin console
         d.uuid = 'the-mighty-big-cat';
       }
-      this.push('cats', d.uuid);
+      var localObj = JSON.parse(localStorage.getItem("sender"));
+      this.push('cats', localObj._id +   "-" + d.uuid);
 
     } else {
       var idx = template.cats.indexOf(d.uuid);
@@ -146,6 +147,7 @@
 
     template.$.pub.message = {
       uuid: localObj._id +   "-" + uuid,
+      uuid_real: sessionStorage.getItem('username'), 
       avatar: avatar,
       color: color,
       text: template.input,
