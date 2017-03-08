@@ -64,8 +64,9 @@
                     });
 
 
-                    Parse.initialize("864978ada6235f558ec04dd5e3200e07c6bb1553");
-                    Parse.serverURL = 'http://52.225.216.48:80/parse';
+                    Parse.initialize("nyctwo");
+Parse.serverURL = 'http://107.170.22.36:1337/parse';
+
                     var params = { 'login': this.user.email, 'password': this.user.password};
 
                     Parse.User.logIn(this.user.email, this.user.password, {
@@ -75,10 +76,17 @@
                              //   if (user) {
                                     // Do stuff after successful login.
                                     sessionStorage.setItem('id', res.id);
+                                    sessionStorage.setItem('user_type', res.attributes.user_type);
                                     sessionStorage.setItem('school', res.attributes.school);
                                     sessionStorage.setItem('username', res.attributes.name);
                                     sessionStorage.setItem('token', res.getSessionToken());
-                                    window.location = '/';
+
+                                    if(sessionStorage.getItem('user_type')=='Profesor'){
+                                        window.location = '/Prof';
+                                    }else{
+                                        window.location = '/';
+                                    }
+                                    
                              //   } else {
                              //       console.log("Error: " + error.code + " " + error.message);
                              //       inputs[i].focus();

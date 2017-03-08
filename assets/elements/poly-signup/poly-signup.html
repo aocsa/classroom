@@ -15,13 +15,13 @@
             }
 
         </style>
-        <paper-button data-dialog="signup" raised>Sign Up</paper-button>
+        <paper-button data-dialog="signup" raised>Registrate</paper-button>
 
         <paper-dialog id="signup" role="dialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation"
                       with-backdrop>
-            <h2>Sign Up</h2>
+            <h2>Registrate</h2>
             <paper-dialog-scrollable>
-                <paper-input name="name" value="{{user.name}}" error-message="we need your name" required label="Name">
+                <paper-input name="name" value="{{user.name}}" error-message="we need your name" required label="Nombre completo">
                     <iron-icon icon="face" prefix></iron-icon>
                 </paper-input>
                 <!--paper-input name="username" value="{{user.username}}" error-message="username should be from 6 to 20 characters" type="text"  required minlength="6" maxlength="20" label="Username">
@@ -29,17 +29,25 @@
                 </paper-input-->
 
                 <paper-input name="email" value="{{user.email}}" error-message="invalid email address" type="email"
-                             required label="Email">
+                             required label="Correo electrónico">
                     <iron-icon icon="icons:drafts" prefix></iron-icon>
                 </paper-input>
                 <paper-input name="password" value="{{user.password}}"
                              error-message="password should be from 6 to 20 characters" required minlength="6"
-                             maxlength="20" type="password" label="Password">
+                             maxlength="20" type="password" label="Contraseña">
                     <iron-icon icon="icons:https" prefix></iron-icon>
                 </paper-input>
 
                 <vaadin-combo-box
-                        label="School"
+                        label="Ocupación"
+                        required
+                        items='["Estudiante", "Profesor"]'
+                        value="{{user.ocupation}}">
+                    <iron-icon icon="myicons:work" prefix></iron-icon>
+                </vaadin-combo-box>
+
+                <vaadin-combo-box
+                        label="Carrera"
                         required
                         items='["Administración", "Contabilidad",   "Economía", "Ingeniería de Sistemas", "Ingeniería Industrial", "Ingeniería Electrónica", "Ingeniería Civil", "Arquitectura"]'
                         value="{{user.school}}">
@@ -48,7 +56,7 @@
                 </vaadin-combo-box>
             </paper-dialog-scrollable>
             <div class="buttons">
-                <paper-button on-click="signup">Sign Up</paper-button>
+                <paper-button on-click="signup">Registrate</paper-button>
             </div>
         </paper-dialog>
     </template>
@@ -74,8 +82,8 @@
                     inputs[i].focus();
                 }
 
-                Parse.initialize("864978ada6235f558ec04dd5e3200e07c6bb1553");
-                Parse.serverURL = 'http://52.225.216.48:80/parse';
+                Parse.initialize("nyctwo");
+                Parse.serverURL = 'http://107.170.22.36:1337/parse';
 
                 //var currentUser = Parse.User.current();
                 //currentUser.logOut();
@@ -100,21 +108,25 @@
                     newuser.set("password", this.user.password);
 
                     newuser.set("school", this.user.school);
+                    newuser.set("user_type", this.user.ocupation);
 
                     var params = { 'login': this.user.email, 'password': this.user.password, 'custom_data': this.user.school};
 
                     newuser.signUp(null, {
                         success: function (res) {
-                            QB.users.create(params, function(err, user){
-                                if (user) {
+                            //QB.users.create(params, function(err, user){
+                            //    if (user) {
                                     // Hooray! Let them use the app now.
                                     sessionStorage.setItem('id', res.id);
+                                    sessionStorage.setItem('user_type', res.attributes.user_type);
+                                    sessionStorage.setItem('school', res.attributes.school);
+                                    sessionStorage.setItem('username', res.attributes.name);
                                     sessionStorage.setItem('token', res.getSessionToken());
-                                    window.location = 'home.html';
-                                 } else  {
-                                    log.console("Error: " + error.code + " " + error.message);
-                                }
-                            });
+                                    window.location = '/';
+                            //     } else  {
+                            //        log.console("Error: " + error.code + " " + error.message);
+                            //    }
+                            //});
                         },
                         error: function (user, error) {
                             // Show the error message somewhere and let the user try again.
