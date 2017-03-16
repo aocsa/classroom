@@ -147,7 +147,7 @@
 
     template.$.pub.message = {
       uuid: localObj._id +   "-" + uuid,
-      uuid_real: sessionStorage.getItem('username'), 
+      uuid_real: sessionStorage.getItem('username'),
       avatar: avatar,
       color: color,
       text: template.input,

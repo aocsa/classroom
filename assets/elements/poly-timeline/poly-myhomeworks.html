@@ -151,7 +151,7 @@
                 listeners: {
                   //'edit-expense': '_editExpense',
                   'expenses-refresh': '_expensesUpdated'
-                
+
                 },
 
                 ready: function() {
@@ -173,7 +173,8 @@
                             grid.getItem(selection[0], function(err, item) {
                                 //this.fire('edit-expense', item);
                                 localStorage.setItem("expense", JSON.stringify(item));
-                                page('/editorhome');
+                                //page('/editorhome');
+                                page('/chat');
                             }.bind(this));
                         }
                     }.bind(this));
@@ -203,7 +204,7 @@
 
                         grid.header.getCell(0, 2).className = 'total';
                     });
-                   
+
                   pubnub.addListener({
                         message: function (m) {
                             if (m.message.foo === 'update-list' && m.message.sender=== sessionStorage.getItem('id')) {
@@ -235,7 +236,7 @@
                 llenarExpenses: function(grid){
                     var TableExpense = Parse.Object.extend("Homework");
                     var query = new Parse.Query(TableExpense);
-                    
+
                     var userClass = Parse.Object.extend("User");
                     var userObj = new userClass();
                     userObj.id = sessionStorage.getItem('id');

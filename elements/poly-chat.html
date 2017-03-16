@@ -1,0 +1,248 @@
+
+<dom-module id="poly-chat">
+
+
+	 <template>
+
+	      <div class="layout vertical fit" id="chat">
+	        <div class="chat-list flex" id = "chatlayout">
+	          <template is="dom-repeat" items="{{messageList}}" as="message">
+	            <x-chat-list color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}" status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+	          </template>
+	        </div>
+	        <div class="shim"></div>
+
+	        <div class="send-message layout horizontal">
+	          <paper-input class="flex" label="Type message..." id="input" value="{{input}}" on-keyup="checkKey"></paper-input>
+	          <paper-fab icon="send" id="sendButton" on-tap="sendMyMessage"></paper-fab>
+	        </div>
+
+
+	      </div>
+
+	</template>
+
+
+
+	<script>
+	  (function() {
+	      'use strict';
+
+			Polymer({
+				is: 'poly-chat',
+				properties: {
+					messageList : [],
+				    uuid : Object,
+				    avatar: Object,
+				    color: Object,
+				    cat: Object,
+				    template: Object,
+				    pastMsgs: [],
+				    cats : [],
+						pubnub : Object,
+						channel: {
+							type: Object,
+							value: 'polymer-chat',
+							notify: true,
+							observer: '_changeChannel'
+          },
+
+				},
+				_changeChannel : function () {
+						console.log('event!!');
+				},
+				ready: function() {
+				  // Assign a uuid made of a random cat and a random color
+							this.color = this.randomColor();
+							this.cat = this.randomCat();
+							this.uuid = this.color + '-' + this.cat;
+							this.avatar = 'images/' + this.cat + '.jpg';
+							this.pastMsgs = [];
+							this.cats = [];
+							this.template = this;
+
+
+							///////////////
+ 	  					this.pubnub = new PubNub({ publishKey : 'pub-c-467437f5-5346-4f8c-9ddf-2de1c90a93c8', subscribeKey : 'sub-c-52679430-efef-11e6-b753-0619f8945a4f' });
+
+ 							this.pubnub.addListener({
+								 message: function(message) {
+									// handle message
+									 var polymerObj = $("#poly-chat"); polymerObj = polymerObj [0];
+										polymerObj.subscribeCallback(message);
+									},
+									presence: function(presenceEvent) {
+											// handle presence
+											var polymerObj = $("#poly-chat"); polymerObj = polymerObj [0];
+											polymerObj.presenceChanged(presenceEvent);
+									}
+							});
+							this.pubnub.history( {
+											channel: this.channel,
+											reverse: true, // Setting to true will traverse the time line in reverse starting with the oldest message first.
+											count: 30, // how many items to fetch
+											stringifiedTimeToken: true, // false is the default
+									},
+									function (status, response) {
+												 var polymerObj = $("#poly-chat"); polymerObj = polymerObj [0];
+ 											   if(response.messages.length > 0) {
+														polymerObj.pastMsgs = polymerObj.getListWithOnlineStatus(response.messages);
+														polymerObj.displayChatList(polymerObj.pastMsgs);
+												}
+									}
+							);
+     				  this.pubnub.subscribe({
+								 channels:[this.channel],
+							 	 withPresence: true
+							 });
+							///////////////
+
+							this.template.channel = this.channel;
+							this.template.uuid = this.uuid;
+							this.template.avatar = this.avatar;
+							this.template.color = this.color;
+							this.template.cats = [];
+							this.template.messageList = [];
+
+					},
+					randomColor : function() {
+			    	var colors = ['navy', 'slate', 'olive', 'moss', 'chocolate', 'buttercup', 'maroon', 'cerise', 'plum', 'orchid'];
+				    return colors[(Math.random() * colors.length) >>> 0];
+				  },
+
+			    randomCat : function() {
+				    var cats = ['tabby', 'bengal', 'persian', 'mainecoon', 'ragdoll', 'sphynx', 'siamese', 'korat', 'japanesebobtail', 'abyssinian', 'scottishfold'];
+				    return cats[(Math.random() * cats.length) >>> 0];
+				  },
+					checkKey : function(e) {
+						if(e.keyCode === 13 || e.charCode === 13) {
+							this.publish();
+						}
+					},
+					// Sending a chat message by clicking a "Send" button
+					sendMyMessage : function(e) {
+						this.publish();
+					},
+
+			  getListWithOnlineStatus : function(list) {
+			    for (var i = 0; i < list.length; i++) {
+						if(list[i].entry)
+				      list[i] = list[i].entry;
+						var l = list[i];
+			      // sanitize avatars
+			      var catName = (l.uuid + '').split('-')[1];
+			      l.avatar = 'images/' + catName + '.jpg';
+
+			      if (catName === undefined || /\s/.test(l.uuid)) {
+			        l.uuid = 'fail-cat';
+			        console.log('Oh you, I made this demo open so nice devs can play with, but you are not nice. Please use your keys, and do not mess with this chat room.');
+			      }
+
+			      // Check status
+			      if(this.template.cats.indexOf(l.uuid) > -1) {
+			        l.status = 'online';
+			      } else {
+			        l.status = 'offline';
+			      }
+			    }
+
+
+			    return list;
+			  },
+
+			  showNewest : function () {
+			    //document.querySelector('core-scaffold').$.headerPanel.scroller.scrollTop = document.querySelector('.chat-list').scrollHeight;
+
+			    var chatDiv = document.querySelector('.chat-list');
+			    if(chatDiv) {
+			      chatDiv.scrollTop = chatDiv.scrollHeight + 100; //TODO: Need to fix so that we can find the .chat-list class object
+			    }
+			  },
+
+			   displayChatList : function(list) {
+			    this.template.messageList = list;
+			    // scroll to bottom when all list items are displayed
+			      this.showNewest() ;
+			  },
+
+			  subscribeCallback : function(o) {
+			    if(o.message) {
+							 console.log(o.message);
+			        this.displayChatList(this.pastMsgs.concat(this.getListWithOnlineStatus( [o.message] )));
+			    }
+			  },
+
+			  presenceChanged : function(e) {
+			    var i = 0;
+			    var l = 1;
+			    var d = e;
+
+			    // how many users
+			    this.template.occupancy = d.occupancy;
+
+			    // who are online
+			    if(d.action === 'join') {
+			      if(d.uuid.length > 35) { // pubnub admin console
+			        d.uuid = 'the-mighty-big-cat';
+			      }
+			      this.push('cats', d.uuid);
+
+			    } else {
+			      var idx = this.template.cats.indexOf(d.uuid);
+			      if(idx > -1) {
+			        this.splice('cats', idx, 1);
+			      }
+			    }
+
+			    i++;
+
+			    // update the status at the main column
+			    if(this.template.messageList.length > 0) {
+			      this.template.messageList = this.getListWithOnlineStatus(this.template.messageList);
+			    }
+			    this.showNewest() ;
+			  },
+
+			  historyRetrieved : function(e) {
+			  if(e.detail[0].length > 0) {
+			      this.pastMsgs = this.getListWithOnlineStatus(e.detail[0]);
+			      this.displayChatList(this.pastMsgs);
+			    }
+			  },
+
+			  publish : function() {
+			    if(!this.template.input)
+						return;
+
+
+			    this.pubnub.publish(  {
+						message: {
+								 uuid: this.uuid,
+								avatar: this.avatar,
+								color: this.color,
+								text: this.template.input,
+								timestamp: new Date().toISOString()
+						},
+						channel: this.channel
+					});
+			    this.template.input = '';
+			  },
+
+			  error : function(e) {
+			      console.log(e);
+			  },
+
+			  _colorClass : function(color) {
+			      return 'middle avatar '+color;
+			  },
+
+			  _backgroundImage : function(avatar) {
+			      return 'background-image: url('+avatar+');';
+			  }
+
+			});
+		})();
+	</script>
+
+
+</dom-module>
