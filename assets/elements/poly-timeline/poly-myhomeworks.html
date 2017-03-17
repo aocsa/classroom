@@ -173,8 +173,11 @@
                             grid.getItem(selection[0], function(err, item) {
                                 //this.fire('edit-expense', item);
                                 localStorage.setItem("expense", JSON.stringify(item));
-                                //page('/editorhome');
-                                page('/chat');
+                                if(item.estado=="nuevo"){
+                                    page('/editorhome');
+                                }else{
+                                    page('/chat');
+                                }
                             }.bind(this));
                         }
                     }.bind(this));

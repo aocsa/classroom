@@ -48,8 +48,9 @@
           },
 
 				},
-				_changeChannel : function () {
+				_changeChannel : function (newChannel) {
 						console.log('event!!');
+						this.channel = newChannel;
 				},
 				ready: function() {
 				  // Assign a uuid made of a random cat and a random color
@@ -60,7 +61,6 @@
 							this.pastMsgs = [];
 							this.cats = [];
 							this.template = this;
-
 
 							///////////////
  	  					this.pubnub = new PubNub({ publishKey : 'pub-c-467437f5-5346-4f8c-9ddf-2de1c90a93c8', subscribeKey : 'sub-c-52679430-efef-11e6-b753-0619f8945a4f' });
@@ -204,7 +204,7 @@
 			  },
 
 			  historyRetrieved : function(e) {
-			  if(e.detail[0].length > 0) {
+			  	if(e.detail[0].length > 0) {
 			      this.pastMsgs = this.getListWithOnlineStatus(e.detail[0]);
 			      this.displayChatList(this.pastMsgs);
 			    }
