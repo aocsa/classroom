@@ -10,7 +10,7 @@ function saveHomework(expense){
     //Activamos el spinner para dar la sensación de carga o estado en proceso
     $('#spinnerSave').prop("active",true);
     $( "#saveButton" ).prop( "disabled", true );
-    
+
     tableExpenseData.set("title", expense.titulo);
     tableExpenseData.set("deadline", expense.deadline);
     tableExpenseData.set("description", expense.descripcion);
@@ -27,7 +27,7 @@ function saveHomework(expense){
         var parseFile = prepareSaveFile(file,name);
         tableExpenseData.set("attachment", parseFile);
     }
-    
+
     tableExpenseData.save(null, {
         success: function(tableExpense) {
             // Execute any logic that should take place after the object is saved.
@@ -80,7 +80,31 @@ function prepareSaveFile(file,name){
     return parseFile;
 }
 
+function sendFirstMessage (userSender, userReceiver, homework) {
+   var pubnub = new PubNub({ publishKey : 'pub-c-467437f5-5346-4f8c-9ddf-2de1c90a93c8', subscribeKey : 'sub-c-52679430-efef-11e6-b753-0619f8945a4f' });
+   var mycolor = 'navy';
+   var mycat = 'mess';
+   var   myuuid = mycat + '-' + mycolor;
+   var    myavatar = 'images/' + 'navy' + '.jpg';
+   var   mychannel = homework.id + '-' + userSender.id + '-' + userReceiver.id;
+    pubnub.publish(  {
+     message: {
+         uuid: myuuid,
+         username : userSender.name,
+         avatar: myavatar,
+         color: mycolor,
+         text: '',
+         timestamp: new Date().toISOString(),
+         meta:   homework
+     },
+     channel:  mychannel
+   });
+}
+
 function saveTableMessage(userSender,userReceiver,cost,PointHomework,PointPayment){
+
+    sendFirstMessage (userSender, userReceiver, PointHomework);
+
     var TableMessage = Parse.Object.extend("Message");
     var tableMessage = new TableMessage();
     tableMessage.set("sender", userSender);
@@ -90,7 +114,7 @@ function saveTableMessage(userSender,userReceiver,cost,PointHomework,PointPaymen
     if(PointPayment!='null'){
         tableMessage.set("payment", PointPayment);
     }
-    
+
     tableMessage.save(null, {
         success: function(tableMessage) {
             console.log('New tableMessage created with objectId: ' + tableMessage.id);
@@ -150,7 +174,7 @@ function savePayment(expense){
         var parseFile = prepareSaveFile(file,name);
         paymentObj.set("attachment", parseFile);
     }
-    
+
     var HomeworkClass = Parse.Object.extend("Homework");
     var homework = new HomeworkClass();
     homework.id = expense._id;

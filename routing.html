@@ -75,7 +75,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             app.route = 'received';
             setFocus(app.route);
         });
-        
+
         page('/contact', function() {
             app.route = 'contact';
             setFocus(app.route);
@@ -96,7 +96,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             expenseEditor.open(localObj);
 
         });
-        
+
         page('/pay', function() {
             app.route = 'pay';
             setFocus(app.route);
@@ -124,9 +124,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            setFocus(app.route);
 
            var PolyChat = document.querySelector('#poly-chat');
-           var localObj = JSON.parse(localStorage.getItem("expense"));
+           var channel = JSON.parse(localStorage.getItem("channel"));
 
-           PolyChat.updateChannel(localObj._id);//+ nameProfesson
+           PolyChat.updateChannel(channel);//+ nameProfesson
        });
 
         // 404

@@ -6,17 +6,14 @@
         <div class="layout vertical fit" id="chat">
           <div class="chat-list flex" id = "chatlayout">
             <template is="dom-repeat" items="{{messageList}}" as="message">
-              <x-chat-list color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}" status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+              <x-chat-list color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}" status="{{message.status}}" timestamp="{{message.timestamp}}" meta={{message.meta}}></x-chat-list>
             </template>
           </div>
           <div class="shim"></div>
-
           <div class="send-message layout horizontal">
             <paper-input class="flex" label="Type message..." id="input" value="{{input}}" on-keyup="checkKey"></paper-input>
             <paper-fab icon="send" id="sendButton" on-tap="sendMyMessage"></paper-fab>
           </div>
-
-
         </div>
 
   </template>
@@ -33,7 +30,6 @@
           messageList : [],
             uuid : Object,
             avatar: Object,
-						username: String,
             color: Object,
             cat: Object,
             template: Object,
@@ -41,17 +37,17 @@
             cats : [],
             pubnub : Object,
             channel: {
-              type: Object,
-              value: 'clear-chat2' 
-          },
+              type: Object
+           }
 
         },
         updateChannel : function (newChannel) {
-            this.channel = newChannel;
+              this.channel = newChannel;
 
-              this.pubnub = new PubNub({ publishKey : 'pub-c-467437f5-5346-4f8c-9ddf-2de1c90a93c8', subscribeKey : 'sub-c-52679430-efef-11e6-b753-0619f8945a4f' });
-
-              this.pubnub.addListener({
+              if (this.template.listener) {
+                this.pubnub.removeListener( this.template.listener);
+              }
+              this.template.listener = {
                  message: function(message) {
                   // handle message
                    var polymerObj = $("#poly-chat"); polymerObj = polymerObj [0];
@@ -62,7 +58,8 @@
                       var polymerObj = $("#poly-chat"); polymerObj = polymerObj [0];
                       polymerObj.presenceChanged(presenceEvent);
                   }
-              });
+              };
+              this.pubnub.addListener(this.template.listener);
               this.pubnub.history( {
                       channel: this.channel,
                       reverse: true, // Setting to true will traverse the time line in reverse starting with the oldest message first.
@@ -71,7 +68,7 @@
                   },
                   function (status, response) {
                          var polymerObj = $("#poly-chat"); polymerObj = polymerObj [0];
-                         if(response.messages.length > 0) {
+                         if(response && response.messages.length > 0) {
                             polymerObj.pastMsgs = polymerObj.getListWithOnlineStatus(response.messages);
                             polymerObj.displayChatList(polymerObj.pastMsgs);
                         }
@@ -88,7 +85,24 @@
               this.template.color = this.color;
               this.template.cats = [];
               this.template.messageList = [];
- 
+
+              // mover este codigo
+              /*var localObj = JSON.parse(localStorage.getItem("expense"));
+              if (localObj) {
+                 this.pubnub.publish(  {
+                  message: {
+                      uuid: this.uuid,
+                      avatar: this.avatar,
+                      color: this.color,
+                      text: this.template.input,
+                      timestamp: new Date().toISOString(),
+                      meta:   localObj
+                  },
+                  channel: this.channel
+                });
+                this.template.input = '';
+              } */
+
         },
         ready: function() {
           // Assign a uuid made of a random cat and a random color
@@ -99,16 +113,17 @@
               this.pastMsgs = [];
               this.cats = [];
               this.template = this;
+              this.pubnub = new PubNub({ publishKey : 'pub-c-467437f5-5346-4f8c-9ddf-2de1c90a93c8', subscribeKey : 'sub-c-52679430-efef-11e6-b753-0619f8945a4f' });
 
-               this.updateChannel (this.channel);
+              // this.updateChannel (this.channel);
           },
           randomColor : function() {
-            var colors = ['moss'];
+            var colors = [  'mess' ];
             return colors[(Math.random() * colors.length) >>> 0];
           },
 
           randomCat : function() {
-            var cats = ['persian'];
+            var cats = ['navy'];
             return cats[(Math.random() * cats.length) >>> 0];
           },
           checkKey : function(e) {
@@ -123,24 +138,28 @@
 
         getListWithOnlineStatus : function(list) {
           for (var i = 0; i < list.length; i++) {
-            if(list[i].entry)
-              list[i] = list[i].entry;
-            var l = list[i];
-            // sanitize avatars
-            var catName = (l.uuid + '').split('-')[1];
-            l.avatar = 'images/' + catName + '.jpg';
+              if(list[i].entry) {
+                 list[i] = list[i].entry;
+              }
+              var l = list[i];
 
-            if (catName === undefined || /\s/.test(l.uuid)) {
-              l.uuid = 'fail-cat';
-              console.log('Oh you, I made this demo open so nice devs can play with, but you are not nice. Please use your keys, and do not mess with this chat room.');
-            }
 
-            // Check status
-            if(this.template.cats.indexOf(l.uuid) > -1) {
-              l.status = 'online';
-            } else {
-              l.status = 'offline';
-            }
+              // sanitize avatars
+              var catName = (l.uuid + '').split('-')[1];
+              l.avatar = 'images/' + catName + '.jpg';
+
+              if (catName === undefined || /\s/.test(l.uuid)) {
+                l.uuid = 'fail-cat';
+                console.log('Oh you, I made this demo open so nice devs can play with, but you are not nice. Please use your keys, and do not mess with this chat room.');
+              }
+
+              // Check status
+              if(this.template.cats.indexOf(l.uuid) > -1) {
+                l.status = 'online';
+              } else {
+                l.status = 'offline';
+              }
+
           }
 
 
@@ -152,13 +171,20 @@
 
           var chatDiv = document.querySelector('.chat-list');
           if(chatDiv) {
-            chatDiv.scrollTop = chatDiv.scrollHeight + 100; //TODO: Need to fix so that we can find the .chat-list class object
+            var myVar = setInterval(this.myTimer, 1000);
+
           }
+        },
+
+         myTimer: function() {
+                var chatDiv = document.querySelector('.chat-list');
+
+              chatDiv.scrollTop = chatDiv.scrollHeight; //TODO: Need to fix so that we can find the .chat-list class object
+
         },
 
          displayChatList : function(list) {
           this.template.messageList = list;
-
           // scroll to bottom when all list items are displayed
             this.showNewest() ;
         },
@@ -167,7 +193,6 @@
           if(o.message) {
                console.log(o.message);
               this.displayChatList(this.template.messageList.concat(this.getListWithOnlineStatus( [o.message] )));
-              //this.pastMsgs.concat(this.getListWithOnlineStatus( [o.message] ));
           }
         },
 
@@ -222,12 +247,7 @@
                 text: this.template.input,
                 timestamp: new Date().toISOString()
             },
-            channel: this.channel,
-						sendByPost: true, // true to send via post
-            storeInHistory: true, //override default storage options
-            meta: {
-                "cool": "meta"
-            }
+            channel: this.channel
           });
           this.template.input = '';
         },

@@ -152,7 +152,7 @@
                 listeners: {
                   //'edit-expense': '_editExpense',
                   'expenses-refresh': '_expensesUpdated'
-                
+
                 },
 
                 ready: function() {
@@ -177,9 +177,20 @@
                             grid.getItem(selection[0], function(err, item) {
                                 //this.fire('edit-expense', item);
                                 if(item.estado=='en progreso'){
-                                    localStorage.setItem("sender", JSON.stringify(item));
-                                     page('/chat');
-                                
+
+                                    for (var i = 0; i < item.elementos.length; i++) {
+
+                                      if (item.elementos[i].sender_user_id === '74lbh0nQ4X') {
+                                          var channel =
+                                               item._id + '-' +
+                                               sessionStorage.getItem('id') + '-' +
+                                               item.elementos[i].sender_user_id;
+                                          localStorage.setItem("channel", JSON.stringify(channel));
+                                         page('/chat');
+                                      }
+                                    }
+
+
                                 }else{
                                     localStorage.setItem("expense", JSON.stringify(item));
                                     page('/pay');
@@ -226,7 +237,7 @@
                                 }
                         }
                     });
-                
+
                 },
 
                 _expensesUpdated : function () {
@@ -261,7 +272,7 @@
                                var object = results[i];
                                var existObj = setClass.contains(object.get('homework').id);
                                var hid = object.get('homework').id;
-                               
+
                                if( (object.get('homework').get('status')=='cotizado' || object.get('homework').get('status')=='en progreso') ){
                                    if(!existObj){
                                         profesores[hid] = [];
