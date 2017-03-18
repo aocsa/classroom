@@ -369,7 +369,7 @@
 
                     if (form.validate()) {
                         //this.expense.total = parseFloat(this.expense.total);
-                        this._saveExpense(this.expense);
+                        savePayment(this.expense);
 
                         console.log("Form Valido!! ");//_saveExpense aun no termina al llamarse esta linea
 
@@ -378,76 +378,6 @@
                         console.log("Form NO valido ");
                     }
                 },
-                 _saveExpense: function(expense) {
-                   //Activamos el spinner para dar la sensación de carga o estado en proceso
-                    $('#spinnerSave').prop("active",true);
-                   this.$.saveButton.disabled = true;
-
-                   // PARSE YA ESTA INICIALIZADO EN POLY-PROFILE
-                   var UserClass = Parse.Object.extend("User");
-                   var user_sender = new UserClass();
-                   user_sender.id = sessionStorage.getItem('id');
-
-                   var user_receiver = new UserClass();
-
-                   var combobox =  document.querySelector('#elements-box');
-                   user_receiver.id =     combobox.selectedItem.sender_user_id;
-
-                   var TableMessage = Parse.Object.extend("Message");
-                   var tableMessage = new TableMessage();
-                   tableMessage.set("sender", user_sender);
-                   tableMessage.set("receiver", user_receiver);
-                   tableMessage.set("cost", expense.total);
-
-                   var PaymentClass = Parse.Object.extend("Payment");
-                   var paymentObj = new PaymentClass();
-                   paymentObj.set('code',this.expense.transaction);
-                   //Guardar archivo/imagen en Parse
-                    if (expense._attachments && expense._attachments.receipt) {
-                        var name = "nameimg.jpg";
-                        var file = new File([expense._attachments.receipt.data],name);
-
-                        var parseFile = new Parse.File(name, file);
-                        parseFile.save().then(function() {
-                            // The file has been saved to Parse.
-                        }, function(error) {
-                            // The file either could not be read, or could not be saved to Parse.
-                            console.log('error parseFile');
-                        });
-                        paymentObj.set("attachment", parseFile);
-                    }
-
-                   tableMessage.set("payment", paymentObj);
-
-                   var HomeworkClass = Parse.Object.extend("Homework");
-                   var homework = new HomeworkClass();
-                   homework.id = expense._id;
-                   homework.set('status','en progreso');
-
-                   tableMessage.set("homework", homework);
-                   tableMessage.save(null, {
-                       success: function(tableMessage) {
-                           console.log('New tableMessage created with objectId: ' + tableMessage.id);
-                           dialogpay.close();
-                           page('/received');
-
-                           pubnub.publish({
-                                channel: 'chatChannel',
-                                message: {foo: 'update-statusProgress', sender_id: sessionStorage.getItem('id'), receiver_id: user_receiver.id }
-                            },function(status, response){
-                                console.log(status.error, response);
-                            });
-                       },
-                       error: function(tableMessage, error) {
-                           console.log("Error: " + error.code + " " + error.message);
-                       }
-                   });
-
-                   app.$.toast.text = 'New object created with objectId: ' + tableMessage.id;
-                   app.$.toast.show();
-
-                   console.log('poly_app/_saveExpense() ' + "ID: " + sessionStorage.getItem('id'));
-               },
 
                 open: function(expense) {
 
