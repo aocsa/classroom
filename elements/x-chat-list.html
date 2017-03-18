@@ -91,17 +91,6 @@ A single user list with a username, avatar, and desc.
 	.avatar.orchid {
 	    border-color: #ce6dbd;
 	}
-	#iconos {
-		position:relative;
-		float:left;
-		width:35px;    
-		height:auto;
-	}
-	
-	#iconos img {
-		width:35px;
-		float:left;
-	}
 	</style>
 
 <script src="../bower_components/time-elements/time-elements.js"></script>
@@ -114,24 +103,14 @@ A single user list with a username, avatar, and desc.
 		<div class="flex">
 			<div class="username">{{username}}</div>
 			<div class="text">{{text}}</div>
-<!--
 			<div id="cotizacion">
-				<div id="iconos">
-					<img src="../images/check.png" />
-				</div>
-				<ul>
-					<strong>CLASE NUEVA</strong> <br><br>
-					<iron-icon icon="icons:book"></iron-icon> Econometría <br>
-					<iron-icon icon="icons:date-range"></iron-icon> Sabado, 20 <br>
-					<iron-icon icon="icons:schedule"></iron-icon> 12:00 - 13:00 <br>
-					<iron-icon icon="icons:inbox"></iron-icon> Skype: albertoteach <br>
-					<iron-icon icon="editor:monetization-on"></iron-icon> 12,00 $ <br>
-				</ul>
-			</div>
--->
+			<div/>
 		</div>
+		
 		<time class="timestamp" is="relative-time" datetime$="{{timestamp}}"></time>
+
 	</section>
+
 </template>
 
 <script>
@@ -143,11 +122,36 @@ Polymer({
 			username: '',
 			text: '',
 			status: '',
-			timestamp: ''
+			timestamp: '',
+			meta: {
+              type: Object,
+              value: null,
+				observer: '_highlightChanged'
+          },
 		},
 		_colorClass: function(color) {
       return 'avatar '+color;
   	},
+	_highlightChanged: function (newvalue) {
+		if (newvalue) {
+
+			this.meta = newvalue;
+			var e = $('#cotizacion');
+			var shtml = '<div id="iconos">' + 
+ 				'</div>' + 
+				'<ul>'+
+					'<strong>CLASE NUEVA</strong> <br><br>' + 
+					'<iron-icon icon="icons:book"></iron-icon> Econometría <br>'+
+					'<iron-icon icon="icons:date-range"></iron-icon> Sabado, 20 <br>'+
+					'<iron-icon icon="icons:schedule"></iron-icon> 12:00 - 13:00 <br>'+
+					'<iron-icon icon="icons:inbox"></iron-icon> Skype: albertoteach <br>'+
+					'<iron-icon icon="editor:monetization-on"></iron-icon> 12,00 $ <br>'+
+				'</ul>';
+			e.html (shtml) ;
+			this.text = '';
+
+		}
+	},
   	_backgroundImage: function(avatar) {
       return 'background-image: url('+avatar+');';
   	},
