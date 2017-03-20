@@ -128,10 +128,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            var PolyChat = document.querySelector('#poly-chat');
            var channel = JSON.parse(localStorage.getItem("channel"));
            var localObj = JSON.parse(localStorage.getItem("expense"));
-           if(localObj.estado=='cotizado'){
-               $('#elementsBoxProfesor').show();
-           }
-
+           
+           PolyChat.expensefunction(localObj);
            PolyChat.updateChannel(channel);//+ nameProfesson
        });
 

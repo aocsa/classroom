@@ -171,7 +171,8 @@ function saveTableMessage(userSender,userReceiver,cost,PointHomework,PointPaymen
                         });
                     }else{//esta es la funcion de savePayment
                         dialogpay.close();
-                        page('/received');
+                        //page('/received');
+                        page('/chat');
                         sendPaymentMessage(userSender, userReceiver,cost, PointHomework,PointPayment);
 
                         pubnub.publish({
@@ -241,7 +242,7 @@ function chatCotizado(item){
             elements.push(item.elementos[i]);
         }
         comboboxProf.items = elements;
-        comboboxProf.value = item.elementos[0].professor;
+        comboboxProf.value = item.elementos[0];
 
         comboboxProf.addEventListener('selected-item-changed', function() {
             chatCambioProfesor(item);
@@ -259,4 +260,8 @@ function chatCambioProfesor(item){
         id_prof;
     localStorage.setItem("channel", JSON.stringify(channel));
     page('/chat');
+}
+
+function sendPay_(){
+    page('/pay');
 }
