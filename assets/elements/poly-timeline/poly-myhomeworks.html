@@ -253,7 +253,7 @@
                             for (var i = 0; i < results.length; i++) {
                                 var object = results[i];
                                 //itemsArray.push({_id:object.id, date: object.get('Date'), merchant: object.get('Merchant'), total: object.get('Total'), status: 'New', comment: object.get('Comment')});
-                                if(object.get('status')!='en progreso'){
+                                if(object.get('status')!='en progreso' && object.get('status')!='cotizado'){
                                     itemsArray.push({_id:object.id,
                                         deadline: object.get('deadline'),
                                         titulo: object.get('title'),

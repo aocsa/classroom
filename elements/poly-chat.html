@@ -6,7 +6,7 @@
         <div class="layout vertical fit" id="chat">
           <div class="chat-list flex" id = "chatlayout">
             <template is="dom-repeat" items="{{messageList}}" as="message">
-              <x-chat-list color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}" status="{{message.status}}" timestamp="{{message.timestamp}}" meta={{message.meta}}></x-chat-list>
+              <x-chat-list color="{{message.color}}" avatar="{{message.avatar}}" titlemsg="{{message.titlemsg}}" username="{{message.username}}" text="{{message.text}}" status="{{message.status}}" timestamp="{{message.timestamp}}" meta={{message.meta}}></x-chat-list>
             </template>
           </div>
           <div class="shim"></div>
@@ -118,12 +118,12 @@
               // this.updateChannel (this.channel);
           },
           randomColor : function() {
-            var colors = [  'mess' ];
+            var colors = [  'moss' ];
             return colors[(Math.random() * colors.length) >>> 0];
           },
 
           randomCat : function() {
-            var cats = ['navy'];
+            var cats = ['estudiante'];
             return cats[(Math.random() * cats.length) >>> 0];
           },
           checkKey : function(e) {
@@ -242,6 +242,7 @@
           this.pubnub.publish(  {
             message: {
                  uuid: this.uuid,
+                 username: sessionStorage.getItem('username'),
                 avatar: this.avatar,
                 color: this.color,
                 text: this.template.input,

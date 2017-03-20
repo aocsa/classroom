@@ -135,7 +135,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <span class="space"></span>
 
                 <!-- Toolbar icons -->
-                 <paper-icon-button icon="refresh"     ></paper-icon-button>
+                
+                <vaadin-combo-box class="elements-box" id = "elementsBoxProfesor"  label="Profesor:" item-label-path="professor">
+                    <iron-icon icon="myicons:school" prefix></iron-icon>
+                </vaadin-combo-box>
 
                 <a data-route="profile" href="{{baseUrl}}profile">
                     <paper-icon-button icon="search"></paper-icon-button>
@@ -266,7 +269,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     })
     pubnub.subscribe({ channels: ['chatChannel'] })
 
-
+    
 
 </script>
 <!-- endbuild-->

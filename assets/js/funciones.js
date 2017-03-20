@@ -82,17 +82,18 @@ function prepareSaveFile(file,name){
 
 function sendFirstMessage (userSender, userReceiver, homework) {
    var pubnub = new PubNub({ publishKey : 'pub-c-467437f5-5346-4f8c-9ddf-2de1c90a93c8', subscribeKey : 'sub-c-52679430-efef-11e6-b753-0619f8945a4f' });
-   var mycolor = 'navy';
-   var mycat = 'mess';
-   var   myuuid = mycat + '-' + mycolor;
-   var    myavatar = 'images/' + 'navy' + '.jpg';
+   var mycolor = 'moss';
+   var mycat = 'estudiante';
+   var   myuuid = mycolor + '-' + mycat;
+   var    myavatar = 'images/' + mycat + '.jpg';
    var   mychannel = homework.id + '-' + userSender.id + '-' + userReceiver.id;
     pubnub.publish(  {
      message: {
          uuid: myuuid,
-         username : userSender.name,
+         username : sessionStorage.getItem('username'),
          avatar: myavatar,
          color: mycolor,
+         titlemsg: "TAREA NUEVA",
          text: '',
          timestamp: new Date().toISOString(),
          meta:   homework
@@ -101,10 +102,50 @@ function sendFirstMessage (userSender, userReceiver, homework) {
    });
 }
 
+function sendPaymentMessage(userSender, userReceiver,costo_, homework,Payment){
+    var pubnub = new PubNub({ publishKey : 'pub-c-467437f5-5346-4f8c-9ddf-2de1c90a93c8', subscribeKey : 'sub-c-52679430-efef-11e6-b753-0619f8945a4f' });
+    var mycolor = 'moss';
+    var mycat = 'estudiante';
+    var   myuuid = mycolor + '-' + mycat;
+    var    myavatar = 'images/' + mycat + '.jpg';
+    var   mychannel = homework.id + '-' + userSender.id + '-' + userReceiver.id;
+
+    var myhomework_username = new Object();
+    myhomework_username.name = sessionStorage.getItem('username');
+    var myAttachment = new Object();
+    myAttachment.url = Payment.get('attachment')._url;
+
+    var metaObj = {
+        title: homework.get('title'),
+        deadline: homework.get('deadline'),
+        homework_user: myhomework_username,
+        description: homework.get('description'),
+        costo: costo_,
+        attachment: myAttachment,
+        codeTransaction: Payment.get('code')
+    };
+
+    pubnub.publish(  {
+        message: {
+            uuid: myuuid,
+            username : sessionStorage.getItem('username'),
+            avatar: myavatar,
+            color: mycolor,
+            titlemsg: "TAREA ACEPTADA",
+            text: '',
+            timestamp: new Date().toISOString(),
+            meta:   metaObj
+        },
+        channel:  mychannel
+    });
+}
+
 function saveTableMessage(userSender,userReceiver,cost,PointHomework,PointPayment){
 
-    sendFirstMessage (userSender, userReceiver, PointHomework);
-
+    if(PointPayment=='null'){//funcion saveHomework
+        sendFirstMessage (userSender, userReceiver, PointHomework);
+    }
+    
     var TableMessage = Parse.Object.extend("Message");
     var tableMessage = new TableMessage();
     tableMessage.set("sender", userSender);
@@ -131,10 +172,11 @@ function saveTableMessage(userSender,userReceiver,cost,PointHomework,PointPaymen
                     }else{//esta es la funcion de savePayment
                         dialogpay.close();
                         page('/received');
+                        sendPaymentMessage(userSender, userReceiver,cost, PointHomework,PointPayment);
 
                         pubnub.publish({
                             channel: 'chatChannel',
-                            message: {foo: 'update-statusProgress', sender_id: sessionStorage.getItem('id'), receiver_id: user_receiver.id }
+                            message: {foo: 'update-statusProgress', sender_id: sessionStorage.getItem('id'), receiver_id: userReceiver.id }
                         },function(status, response){
                             console.log(status.error, response);
                         });
@@ -162,6 +204,8 @@ function savePayment(expense){
     var combobox =  document.querySelector('#elements-box');
     user_receiver.id =     combobox.selectedItem.sender_user_id;
 
+
+
     var PaymentClass = Parse.Object.extend("Payment");
     var paymentObj = new PaymentClass();
     var codeTransaction = $('#transaction').val();
@@ -179,9 +223,40 @@ function savePayment(expense){
     var homework = new HomeworkClass();
     homework.id = expense._id;
     homework.set('status','en progreso');
+    homework.set('profesorId',user_receiver.id);//nuevo
 
     saveTableMessage(user_sender,user_receiver,expense.total,homework,paymentObj);
 
     app.$.toast.text = 'New object created with objectId: ';
     app.$.toast.show();
+}
+
+function chatCotizado(item){
+    if(item.estado=='cotizado'){//Muestra la lista de profesores
+        var profesoresBox = $('#elementsBoxProfesor');
+        profesoresBox.show();
+        var comboboxProf = document.querySelector('#elementsBoxProfesor');
+        var elements = [];
+        for(var i=0;i<item.elementos.length;i++){
+            elements.push(item.elementos[i]);
+        }
+        comboboxProf.items = elements;
+        comboboxProf.value = item.elementos[0].professor;
+
+        comboboxProf.addEventListener('selected-item-changed', function() {
+            chatCambioProfesor(item);
+        });
+    }
+}
+
+function chatCambioProfesor(item){
+    //alert('cambio de profesor');
+    var comboboxProf = document.querySelector('#elementsBoxProfesor');
+    var id_prof = comboboxProf.selectedItem.sender_user_id;
+    var channel =
+        item._id + '-' +
+        sessionStorage.getItem('id') + '-' +
+        id_prof;
+    localStorage.setItem("channel", JSON.stringify(channel));
+    page('/chat');
 }

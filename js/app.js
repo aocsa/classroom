@@ -5,7 +5,7 @@
 
   // Assign a uuid made of a random cat and a random color
   var randomColor = function() {
-    var colors = ['navy'];
+    var colors = ['moss'];
     return colors[(Math.random() * colors.length) >>> 0];
   };
 

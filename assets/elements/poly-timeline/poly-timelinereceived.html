@@ -176,19 +176,27 @@
                         if (selection.length === 1) {
                             grid.getItem(selection[0], function(err, item) {
                                 //this.fire('edit-expense', item);
-                                if(item.estado=='en progreso'){
+                                if(item.estado=='en progreso' || item.estado=='cotizado'){
+                                        localStorage.setItem("expense", JSON.stringify(item));
+                                        chatCotizado(item);
+                                    //for (var i = 0; i < item.elementos.length; i++) {
 
-                                    for (var i = 0; i < item.elementos.length; i++) {
+                                      //if (item.elementos[i].sender_user_id === '74lbh0nQ4X') {
+                                          var id_prof = '';
+                                          if(item.profesorId_homework){
+                                              id_prof = item.profesorId_homework;
+                                          }else{
+                                              id_prof = item.elementos[0].sender_user_id
+                                          }
 
-                                      if (item.elementos[i].sender_user_id === '74lbh0nQ4X') {
                                           var channel =
                                                item._id + '-' +
                                                sessionStorage.getItem('id') + '-' +
-                                               item.elementos[i].sender_user_id;
+                                               id_prof;
                                           localStorage.setItem("channel", JSON.stringify(channel));
                                          page('/chat');
-                                      }
-                                    }
+                                      //}
+                                    //}
 
 
                                 }else{
@@ -286,6 +294,7 @@
                                                     homework_user_id: object.get('homework').get('homework_user').id,
                                                     sender_user_id: object.get('sender').id,
                                                     professor: object.get('sender').get('name'),
+                                                    profesorId_homework: object.get('homework').get('profesorId'),//nuevo
                                                     elementos : []
                                                      });
                                         contador = contador + 1;

@@ -91,6 +91,31 @@ A single user list with a username, avatar, and desc.
 	.avatar.orchid {
 	    border-color: #ce6dbd;
 	}
+	#iconos {
+     position:relative;
+     float:left;
+     width:35px;    
+     height:auto;
+	}
+	
+	#iconos img {
+	width:35px;
+	float:left;
+	}
+
+	.imagen {
+		position: relative;
+		display: block;
+		width: 250px;
+		border-radius: 5px;
+		box-shadow: 0px 0px 3px #eee;
+		transition: all .4s cubic-bezier(0.565, -0.260, 0.255, 1.410);
+		cursor: default;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+	}
 	</style>
 
 <script src="../bower_components/time-elements/time-elements.js"></script>
@@ -100,17 +125,25 @@ A single user list with a username, avatar, and desc.
 		<div class$="{{_colorClass(color)}}" style$="{{_backgroundImage(avatar)}})">
 			<div class$="{{_statusClass(status)}}"></div>
 		</div>
-		<div class="flex">
+		<div class="flex" id="msg">
 			<div class="username">{{username}}</div>
 			<div class="text">{{text}}</div>
-			<div id="cotizacion">
-			<div/>
+			<div id="cotizacion" hidden = true >
+					<ul>
+					<strong>{{titlemsg}}</strong> <br><br>
+					<iron-icon icon="icons:book"></iron-icon> {{meta.title}} <br>
+					<iron-icon icon="icons:date-range"></iron-icon> {{meta.deadline}}  <br>
+ 					<div id="homework_user" hidden=true><iron-icon icon="icons:assignment-ind"></iron-icon> {{meta.homework_user.name}}  <br></div>
+					 <iron-icon icon="icons:description"></iron-icon> {{meta.description}}  <br>
+					 <div id="costo" hidden=true><iron-icon icon="editor:attach-money"></iron-icon> {{meta.costo}}  <br></div>
+					 <div id="codeTransfer" hidden=true><iron-icon icon="icons:credit-card"></iron-icon> {{meta.codeTransaction}}  <br></div>
+					 <img class = "imagen" id="imagenId" border="0" alt="image" src="{{meta.attachment.url}}" width="100" height="100" hidden = true/>
+ 					</ul>
+			</div>	 
+			{{expense.estado}}
 		</div>
-		
 		<time class="timestamp" is="relative-time" datetime$="{{timestamp}}"></time>
-
 	</section>
-
 </template>
 
 <script>
@@ -122,12 +155,13 @@ Polymer({
 			username: '',
 			text: '',
 			status: '',
+			titlemsg:'',
 			timestamp: '',
 			meta: {
               type: Object,
               value: null,
 				observer: '_highlightChanged'
-          },
+          	}
 		},
 		_colorClass: function(color) {
       return 'avatar '+color;
@@ -137,19 +171,21 @@ Polymer({
 
 			this.meta = newvalue;
 			var e = $('#cotizacion');
-			var shtml = '<div id="iconos">' + 
- 				'</div>' + 
-				'<ul>'+
-					'<strong>CLASE NUEVA</strong> <br><br>' + 
-					'<iron-icon icon="icons:book"></iron-icon> Econometría <br>'+
-					'<iron-icon icon="icons:date-range"></iron-icon> Sabado, 20 <br>'+
-					'<iron-icon icon="icons:schedule"></iron-icon> 12:00 - 13:00 <br>'+
-					'<iron-icon icon="icons:inbox"></iron-icon> Skype: albertoteach <br>'+
-					'<iron-icon icon="editor:monetization-on"></iron-icon> 12,00 $ <br>'+
-				'</ul>';
-			e.html (shtml) ;
-			this.text = '';
+			this.$.cotizacion.hidden = false;
 
+			if(this.meta.attachment){
+				this.$.imagenId.hidden = false;
+			}
+			if(this.meta.costo){//solo existe si se cotiza
+				this.$.costo.hidden=false;
+			}
+			if(this.meta.homework_user){//no hay homework_user cuando se cotiza
+				this.$.homework_user.hidden=false;
+			}
+			
+			if(this.meta.codeTransaction){//solo cuando el alumno paga
+				this.$.codeTransfer.hidden=false;
+			}
 		}
 	},
   	_backgroundImage: function(avatar) {
