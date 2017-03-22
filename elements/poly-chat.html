@@ -59,10 +59,7 @@
         expensefunction : function (expenseValue) {
           if(expenseValue){
               this.expense = expenseValue;
-              if(expenseValue.estado=='cotizado'){//El alumno tiene que enviar pago
-                this.$.message_normal.hidden = true;
-                this.$.message_pay.hidden = false;                
-              }
+              sendMessageChangeInput(expenseValue,this);
           }
         },
         sendPay: function(){

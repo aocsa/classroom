@@ -22,9 +22,7 @@ function saveHomework(expense){
 
     //Guardar archivo/imagen en Parse
     if (expense._attachments && expense._attachments.receipt) {
-        var name = "nameimg.jpg";
-        var file = new File([expense._attachments.receipt.data],name);
-        var parseFile = prepareSaveFile(file,name);
+        var parseFile = prepareSaveFile(expense._attachments.receipt);
         tableExpenseData.set("attachment", parseFile);
     }
 
@@ -69,7 +67,12 @@ function saveHomework(expense){
     });
 }
 
-function prepareSaveFile(file,name){
+function prepareSaveFile(receipt){
+    var name = receipt.name;
+    var file = receipt.data;
+    if(isFileImage){
+        file = new File([receipt.data],name);
+    }
     var parseFile = new Parse.File(name, file);
     parseFile.save().then(function() {
         // The file has been saved to Parse.
@@ -213,10 +216,7 @@ function savePayment(expense){
     paymentObj.set('code',codeTransaction);
     //Guardar archivo/imagen en Parse
     if (expense._attachments && expense._attachments.receipt) {
-        var name = "nameimg.jpg";
-        var file = new File([expense._attachments.receipt.data],name);
-
-        var parseFile = prepareSaveFile(file,name);
+        var parseFile = prepareSaveFile(expense._attachments.receipt);
         paymentObj.set("attachment", parseFile);
     }
 
@@ -264,4 +264,31 @@ function chatCambioProfesor(item){
 
 function sendPay_(){
     page('/pay');
+}
+
+function isFileImage(type){
+    var typeImg = "image/";
+    var tam = typeImg.length;
+    for(var i=0;i<tam;i++){
+        if(type[i]!=typeImg[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
+function onerrorImg(source){
+    //alert("error image load");
+    source.hidden = true;
+}
+
+function sendMessageChangeInput(expense,contexto){
+    if(expense.estado=='cotizado'){//tiene que enviar pago
+       contexto.$.message_normal.hidden = true;
+       contexto.$.message_pay.hidden = false;           
+    }
+    if(expense.estado=='en progreso'){//Puede hablar libremente
+        contexto.$.message_normal.hidden = false;
+        contexto.$.message_pay.hidden = true;
+    }
 }

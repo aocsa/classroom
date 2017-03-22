@@ -182,13 +182,14 @@
                     </form>
                 </div>
                 <div class="receipt">
-                    <vaadin-upload id="upload" accept="image/*" max-files="1" on-upload-before="_handleUpload" required>
-                        <div class="file-list">
+                    <vaadin-upload id="imgUpload" max-files="1" on-upload-before="_handleUpload"></vaadin-upload>
+                    
+                        <div class="file-list" id="imageupload" >
                             <div class="receipt-wrapper">
                                 <img src$="[[_receiptURL]]" alt="Receipt" hidden$="[[!_showReceipt(expense._attachments.*)]]">
                             </div>
                         </div>
-                    </vaadin-upload>
+                    
                 </div>
             </div>
             <div class="buttons-layout">
@@ -238,8 +239,8 @@
                 observers: ['_updateReceiptURL(expense._attachments.*)'],
 
                 ready: function() {
-                    this.$.upload.set('i18n.dropFiles.one', 'Arrastra el archivo aqui...');
-                    this.$.upload.set('i18n.addFiles.one', 'Seleccionar archivo');
+                    //this.$.upload.set('i18n.dropFiles.one', 'Arrastra el archivo aqui...');
+                    this.$.imgUpload.set('i18n.addFiles.one', 'Seleccionar archivo');
                 },
 
                 attached: function() {
@@ -344,18 +345,51 @@
                     reader.readAsDataURL(file);
                 },
 
+                _showOtherUploadFile: function(file, callback, mimeType){
+                    var reader = new FileReader();
+                    reader.onload = function() {
+                        callback(reader.result);
+                    }.bind(this);
+                    reader.readAsDataURL(file);
+                },
                 _handleUpload: function(e) {
                     var file = e.detail.file;
-                    this._resizeImage(file, function(data) {
-                        this.expense._attachments = this.expense._attachments || {};
-                        this.set('expense._attachments.receipt', {
-                            type: 'image/jpeg',
-                            data: data
-                        });
-                    }.bind(this), 'image/jpeg', 1000, 1000);
+                    if(isFileImage(file.type)){
+                        this._resizeImage(file, function(data) {
+                            this.expense._attachments = this.expense._attachments || {};
+                            this.set('expense._attachments.receipt', {
+                                type: 'image/jpeg',
+                                name: file.name,
+                                data: data
+                            });
+                        }.bind(this), 'image/jpeg', 1000, 1000);
 
-                    this.$.upload.files = [];
-                    e.preventDefault();
+                        //this.$.imgUpload.files = [];
+                        this.$.imageupload.hidden = false;
+                        e.preventDefault();
+                    }
+                    else{//otro tipo de archivo
+                        //alert(file.name);
+                        /*this._showOtherUploadFile(file, function(data) {
+                            this.expense._attachments = this.expense._attachments || {};
+                            this.set('expense._attachments.receipt', {
+                                type: file.type,
+                                name: file.name,
+                                data: data
+                            });
+                        }.bind(this), file.type);
+
+                        this.$.imgUpload.files = [];*/
+                         this.expense._attachments = this.expense._attachments || {};
+                            this.set('expense._attachments.receipt', {
+                                type: file.type,
+                                name: file.name,
+                                data: file
+                            });
+
+                        this.$.imageupload.hidden = true;
+                        e.preventDefault();
+                    }
                 },
                 _save: function() {
                     this.$.error.innerText = '';
@@ -388,7 +422,7 @@
                         this.set('expense.titulo', expense.titulo);
                     }
 
-                    this.$.upload.files = [];
+                    this.$.imgUpload.files = [];
 
                     if (!expense.estado) {
                         this.expense.estado = 'nuevo';
