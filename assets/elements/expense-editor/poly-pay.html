@@ -199,8 +199,8 @@
                         </div>
             </div>
             <div class="buttons-layout">
-                <paper-button raised on-tap="_save" class="save-button" id="saveButton">Aceptar</paper-button>
-                <paper-spinner id='spinnerSave'></paper-spinner>
+                <paper-button raised on-tap="_save" class="save-button" id="saveButtonPay">Aceptar</paper-button>
+                <paper-spinner id='spinnerSavePay'></paper-spinner>
                 <paper-button on-tap="close" class="cancel-button">Cancelar</paper-button>
                 <paper-button on-tap="_delete" id="delete" class="delete-button" hidden>Delete</paper-button>
             </div>
@@ -386,8 +386,8 @@
                     this.expense = JSON.parse(JSON.stringify(expense));
 
                     //Quitamos la sensacion de carga o estado en proceso
-                    this.$.saveButton.disabled = false;
-                    $('#spinnerSave').removeAttr("active");
+                    this.$.saveButtonPay.disabled = false;
+                    $('#spinnerSavePay').removeAttr("active");
 
                     var combobox = combobox || document.querySelector('#elements-box');
 

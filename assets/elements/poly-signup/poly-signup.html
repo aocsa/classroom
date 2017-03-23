@@ -94,11 +94,6 @@
                 //currentUser.logOut();
 
                 if (is_valid) {
-                    Parse.User.logOut().then(function () {
-                        console.log(Parse.User.current());
-                    }, function (error) {
-                        console.log(error);
-                    });
 
                     var newuser = new Parse.User();
                     newuser.set("name", this.user.name);
@@ -114,19 +109,7 @@
 
                     newuser.signUp(null, {
                         success: function (res) {
-                            //QB.users.create(params, function(err, user){
-                            //    if (user) {
-                                    // Hooray! Let them use the app now.
-                                    sessionStorage.setItem('id', res.id);
-                                    sessionStorage.setItem('user_type', res.attributes.user_type);
-                                    sessionStorage.setItem('school', res.attributes.school);
-                                    sessionStorage.setItem('username', res.attributes.name);
-                                    sessionStorage.setItem('token', res.getSessionToken());
-                                    window.location = '/';
-                            //     } else  {
-                            //        log.console("Error: " + error.code + " " + error.message);
-                            //    }
-                            //});
+                            UserLogin(res);
                         },
                         error: function (user, error) {
                             // Show the error message somewhere and let the user try again.

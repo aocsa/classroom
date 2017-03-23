@@ -175,7 +175,6 @@ function saveTableMessage(userSender,userReceiver,cost,PointHomework,PointPaymen
                     }else{//esta es la funcion de savePayment
                         dialogpay.close();
                         //page('/received');
-                        page('/chat');
                         sendPaymentMessage(userSender, userReceiver,cost, PointHomework,PointPayment);
 
                         pubnub.publish({
@@ -184,6 +183,11 @@ function saveTableMessage(userSender,userReceiver,cost,PointHomework,PointPaymen
                         },function(status, response){
                             console.log(status.error, response);
                         });
+                        //Cambiamos el estado 
+                        var localObj = JSON.parse(localStorage.getItem("expense"));
+                        localObj.estado = "en progreso";
+                        localStorage.setItem("expense", JSON.stringify(localObj));
+                        page('/chat');
                     }
                 //}
         },
@@ -195,8 +199,8 @@ function saveTableMessage(userSender,userReceiver,cost,PointHomework,PointPaymen
 
 function savePayment(expense){
     //Activamos el spinner para dar la sensación de carga o estado en proceso
-    $('#spinnerSave').prop("active",true);
-    $( "#saveButton" ).prop( "disabled", true );
+    $('#spinnerSavePay').prop("active",true);
+    $( "#saveButtonPay" ).prop( "disabled", true );
 
     // PARSE YA ESTA INICIALIZADO EN POLY-PROFILE
     var UserClass = Parse.Object.extend("User");

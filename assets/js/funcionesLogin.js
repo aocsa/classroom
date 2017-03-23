@@ -49,7 +49,7 @@ function saveUserFacebook(){
         //school: ??
         Parse.User.logIn(response.id, 'passwordFB:'+ response.id, {
             success: function(results) {
-                UserFacebook(results);
+                UserLogin(results);
             },
             error: function (user, error) {
                 // The login failed. Check error to see why.
@@ -61,8 +61,7 @@ function saveUserFacebook(){
 }
 
 //si el usuario si esta en la base de datos
-function UserFacebook(res){
-    console.log("is userFabeook");
+function UserLogin(res){
     sessionStorage.setItem('id', res.id);
     sessionStorage.setItem('user_type', res.attributes.user_type);
     sessionStorage.setItem('school', res.attributes.school);
@@ -83,7 +82,7 @@ function registrarUserFacebook(response){
 
     newuser.signUp(null, {
         success: function (res) {
-            UserFacebook(res);
+            UserLogin(res);
         },
         error: function (user, error) {
             // Show the error message somewhere and let the user try again.

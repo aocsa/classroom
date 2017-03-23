@@ -58,34 +58,10 @@
 
                 if (is_valid) {
 
-                    Parse.initialize("nyctwo");
-                    Parse.serverURL = 'http://107.170.22.36:1337/parse';
-
-                    var params = { 'login': this.user.email, 'password': this.user.password};
-
                     Parse.User.logIn(this.user.email, this.user.password, {
                         success: function (res) {
-
-                            //QB.login(params, function(err, user) {
-                             //   if (user) {
-                                    // Do stuff after successful login.
-                                    sessionStorage.setItem('id', res.id);
-                                    sessionStorage.setItem('user_type', res.attributes.user_type);
-                                    sessionStorage.setItem('school', res.attributes.school);
-                                    sessionStorage.setItem('username', res.attributes.name);
-                                    sessionStorage.setItem('token', res.getSessionToken());
-
-                                    if(sessionStorage.getItem('user_type')=='Profesor'){
-                                        window.location = '/Prof';
-                                    }else{
-                                        window.location = '/';
-                                    }
+                            UserLogin(res);
                                     
-                             //   } else {
-                             //       console.log("Error: " + error.code + " " + error.message);
-                             //       inputs[i].focus();
-                              //  }
-                            //});
                         },
                         error: function (user, error) {
                             // The login failed. Check error to see why.
