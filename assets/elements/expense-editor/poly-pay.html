@@ -350,6 +350,7 @@
                         this.expense._attachments = this.expense._attachments || {};
                         this.set('expense._attachments.receipt', {
                             type: 'image/jpeg',
+                            name: file.name,
                             data: data
                         });
                     }.bind(this), 'image/jpeg', 1000, 1000);

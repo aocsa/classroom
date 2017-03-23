@@ -15,11 +15,11 @@
             }
 
         </style>
-        <paper-button data-dialog="login" raised>Login</paper-button>
+        <paper-button data-dialog="login" raised>Inicia sesión</paper-button>
 
         <paper-dialog id="login" role="dialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation"
                       with-backdrop>
-            <h2>Login</h2>
+            <h2>Inicia sesión</h2>
             <paper-dialog-scrollable>
                 <paper-input name="email" value="{{user.email}}" error-message="Please write email" type="email"
                              required label="Email" id="inputWithButton">
@@ -32,7 +32,7 @@
                 </paper-input>
                 <paper-dialog-scrollable>
                     <div class="buttons">
-                        <paper-button on-click="login">Login</paper-button>
+                        <paper-button on-click="login">Entra</paper-button>
                     </div>
         </paper-dialog>
     </template>
@@ -57,15 +57,9 @@
                 }
 
                 if (is_valid) {
-                    QB.init(QBApp.appId, QBApp.authKey, QBApp.authSecret);
-
-                    QB.createSession(function(err,result){
-                        console.log('Session create callback', err, result);
-                    });
-
 
                     Parse.initialize("nyctwo");
-Parse.serverURL = 'http://107.170.22.36:1337/parse';
+                    Parse.serverURL = 'http://107.170.22.36:1337/parse';
 
                     var params = { 'login': this.user.email, 'password': this.user.password};
 

@@ -174,9 +174,11 @@
                     </form>
                 </div>
                 <div class="receipt">
+                        <div id="fileLinkeditorHome" hidden = true><iron-icon icon="icons:cloud-download"></iron-icon><a href="{{_receiptURL}}" target="_blank"> Archivo adjunto</a></div>
+					 
                         <div class="file-list">
                             <div class="receipt-wrapper">
-                                <img src$="[[_receiptURL]]" alt="Receipt" hidden$="[[!_showReceipt(expense._attachments.*)]]">
+                                <img src$="[[_receiptURL]]" id="imgEditorHome" onerror='onerrorImg(this);' alt="Receipt" hidden$="[[!_showReceipt(expense._attachments.*)]]">
                             </div>
                         </div>
                 </div>
@@ -214,7 +216,7 @@
                     _receiptURL: {
                         type: String,
                         notify: true,
-                        value: 'assets/img/default-receipt.png'
+                        value: ''
                     },
                     route: Object,
                     routeData: Object
@@ -259,9 +261,7 @@
                         } else {
                             this._receiptURL = this.expense._attachments.receipt.url;
                         }
-                    } else {
-                        this._receiptURL = 'assets/img/default-receipt.png';
-                    }
+                    } 
                     this.$.dialoghome.notifyResize();
                 },
 
@@ -332,6 +332,11 @@
                     // File objects don't survive the JSON dance, so copy that over manually
                     if (expense._attachments) {
                         this.set('expense._attachments', expense._attachments);
+                        if(expense._attachments.receipt){
+                            this.$.fileLinkeditorHome.hidden = false;
+                        }else{
+                            this.$.fileLinkeditorHome.hidden = true;
+                        }
                     }
 
                     this.set('expense.titulo', '');

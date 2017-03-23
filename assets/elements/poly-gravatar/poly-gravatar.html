@@ -57,9 +57,7 @@
         return f ? "open" : "";
       },
       appLogout: function(){
-        sessionStorage.removeItem('id');
-        sessionStorage.removeItem('email');
-        sessionStorage.removeItem('token');
+        logout();
         location.href = "/";
       },
       gid: function(email){

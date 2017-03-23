@@ -18,7 +18,7 @@
         <paper-button data-dialog="signup" raised>Registrate</paper-button>
 
         <paper-dialog id="signup" role="dialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation"
-                      with-backdrop>
+                      with-backdrop modal>
             <h2>Registrate</h2>
             <paper-dialog-scrollable>
                 <paper-input name="name" value="{{user.name}}" error-message="we need your name" required label="Nombre completo">
@@ -56,6 +56,7 @@
                 </vaadin-combo-box>
             </paper-dialog-scrollable>
             <div class="buttons">
+                <paper-button on-click="closeSignup">Cancelar</paper-button>
                 <paper-button on-click="signup">Registrate</paper-button>
             </div>
         </paper-dialog>
@@ -69,6 +70,10 @@
                     type: Object,
                     value: {}
                 }
+            },
+
+            closeSignup: function(){
+                signup.close();
             },
 
             signup: function () {
@@ -93,11 +98,6 @@
                         console.log(Parse.User.current());
                     }, function (error) {
                         console.log(error);
-                    });
-                    QB.init(QBApp.appId, QBApp.authKey, QBApp.authSecret);
-
-                    QB.createSession(function(err,result){
-                        console.log('Session create callback', err, result);
                     });
 
                     var newuser = new Parse.User();

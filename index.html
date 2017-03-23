@@ -62,6 +62,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="stylesheet" is="custom-style" href="bower_components/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" is="custom-style" href="bower_components/bootstrap-social/bootstrap-social.css">
 
+    <script src="bower_components/sweetalert/dist/sweetalert.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="bower_components/sweetalert/dist/sweetalert.css">
+
 
     <!-- Importing the elements file -->
     <link rel="import" href="elements.html">
@@ -141,7 +144,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </vaadin-combo-box>
 
                 <a data-route="profile" href="{{baseUrl}}profile">
-                    <paper-icon-button icon="search"></paper-icon-button>
+                    <paper-icon-button icon="social:person"></paper-icon-button>
                 </a>
 
                 <!-- Application name -->
@@ -200,6 +203,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </paper-header-panel>
     </paper-drawer-panel>
 
+    <paper-dialog id="selectSchoolDialog" modal>
+        <h2>Selecciona Tu Carrera</h2>
+        <vaadin-combo-box id="selectSchool"
+                label="Carrera"
+                required
+                items='["Administración", "Contabilidad",   "Economía", "Ingeniería de Sistemas", "Ingeniería Industrial", "Ingeniería Electrónica", "Ingeniería Civil", "Arquitectura"]'
+                value="Administración">
+            <iron-icon icon="myicons:school" prefix></iron-icon>
+        </vaadin-combo-box>
+        <div class="buttons">
+            <paper-button autofocus onclick="actualizarSchool()">ACEPTAR</paper-button>
+        </div>
+    </paper-dialog>
 
     <paper-toast id="toast">
         <span class="toast-hide-button" role="button" tabindex="0" onclick="app.$.toast.hide()">Ok</span>
@@ -214,11 +230,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.4.4.js"></script>
 <!-- Funciones neesarias -->
 <script src="assets/js/funciones.js"></script>
+<script src="assets/js/funcionesLogin.js"></script>
 
 
 <script>
     Parse.initialize("nyctwo");
     Parse.serverURL = 'http://107.170.22.36:1337/parse';
+
+    InitAPIFacebookWeb();
 
     var GameScore = Parse.Object.extend("User");
     var query = new Parse.Query(GameScore);
@@ -226,8 +245,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     query.find({
         success: function(results) {
             if (results.length == 1 ) {
-                this.user = request.detail.response;
-                window.app.user = request.detail.response;
+                if (sessionStorage.getItem('user_type') === "Estudiante") {
+                    verificarSchool();
+                }
+                else {
+
+                  swal({
+                        title: "Advertencia!",
+                        text: "Tu te registraste como Profesor, usa la app del Profesor!",
+                        showCancelButton: false,
+                        closeOnConfirm: false,
+                        showLoaderOnConfirm: true,
+                    },
+                    function(){
+                        logout();
+                        window.location = "login.html";
+                    });
+
+                }
             }
             else {
                  window.location = "login.html";
@@ -238,31 +273,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
     });
 
-    function StringSet() {
-        var setObj = {}, val = {};
-
-        this.add = function(str) {
-            setObj[str] = val;
-        };
-
-        this.contains = function(str) {
-            return setObj[str] === val;
-        };
-
-        this.remove = function(str) {
-            delete setObj[str];
-        };
-
-        this.values = function() {
-            var values = [];
-            for (var i in setObj) {
-                if (setObj[i] === val) {
-                    values.push(i);
-                }
-            }
-            return values;
-        };
-    }
+    
    var pubnub = new PubNub({
         publishKey : 'pub-c-467437f5-5346-4f8c-9ddf-2de1c90a93c8',
         subscribeKey : 'sub-c-52679430-efef-11e6-b753-0619f8945a4f'

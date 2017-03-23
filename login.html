@@ -55,34 +55,10 @@
 
 
 
-    <script>
-        var googleUser = {};
-        var startApp = function () {
-            gapi.load('auth2', function () {
-                // Retrieve the singleton for the GoogleAuth library and set up the client.
-                auth2 = gapi.auth2.init({
-                    client_id: '549624147622-qo2sbncpb3t8ui9fcda07kt3r5dim765.apps.googleusercontent.com',
-                    cookiepolicy: 'single_host_origin',
-                    // Request scopes in addition to 'profile' and 'email'
-                    //scope: 'additional_scope'
-                });
-                attachSignin(document.getElementById('googleBnt'));
-            });
-        };
-        function attachSignin(element) {
-            console.log(element.id);
-            auth2.attachClickHandler(element, {},
-                function (googleUser) {
-                    document.getElementById('name').innerText = "Signed in: " + googleUser.getBasicProfile().getName();
-                }, function (error) {
-                    alert(JSON.stringify(error, undefined, 2));
-                });
-        }
-    </script>
-
-
     <!-- Importing the elements file -->
     <link rel="import" href="elements.html">
+    <!-- Funciones neesarias -->
+    <script src="assets/js/funcionesLogin.js"></script>
 
 </head>
 <body unresolved>
@@ -102,17 +78,10 @@
                     </a>
                     <p></p>
                 </div>
-
-
-                <div class="flex-4" id="googleBnt">
-                    <a class="btn btn-block btn-social btn-google">
-                        <span class="fa fa-google"></span> Sign in with Google
-                    </a>
-                </div>
             </div>
 
 
-            <div onclick="app.helpers.clickHandler(event)">
+            <div onclick="app_login.helpers.clickHandler(event)">
                 <poly-login></poly-login>
                 <poly-signup></poly-signup>
             </div>
@@ -123,54 +92,22 @@
     </div>
 </div>
 <script>
-    startApp();
 
     Parse.initialize("nyctwo");
-Parse.serverURL = 'http://107.170.22.36:1337/parse';
-    // Load the SDK asynchronously
-    window.fbAsyncInit = function () {
-        Parse.FacebookUtils.init({ // this line replaces FB.init({
-            appId: '1070001599751830', // Facebook App ID
-            status: true,  // check Facebook Login status
-            cookie: true,
-            xfbml: true,  // initialize Facebook social plugins on the page
-            version: 'v2.2' // point to the latest Facebook Graph API version
-        });
-
-        // Run code after the Facebook SDK is loaded.
-    };
-
-    (function (d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) {
-            return;
-        }
-        js = d.createElement(s);
-        js.id = id;
-        js.src = "//connect.facebook.net/en_US/sdk.js";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
+    Parse.serverURL = 'http://107.170.22.36:1337/parse';
+    
+    InitAPIFacebookWeb();
 
 
     $("#facebookBnt").click(function () {
-        Parse.FacebookUtils.logIn(null, {
-            success: function (user) {
-
-                sessionStorage.setItem('id', user.id);
-                sessionStorage.setItem('token', user.getSessionToken());
-                window.location = '/studychat/home.html';
-            },
-            error: function (user, error) {
-                alert("User cancelled the Facebook login or did not fully authorize.");
-            }
-        });
+        loginWebFacebook();
     });
 
 
 </script>
 <script >
 
-    var App = function(){
+    var AppLogin = function(){
         this.is_mobile = false;
         this.init = function(){
             if(location.pathname == "/" && sessionStorage.getItem('token')) {
@@ -202,8 +139,8 @@ Parse.serverURL = 'http://107.170.22.36:1337/parse';
         this.songIndex = 0;
 
     };
-    var app = new App();
-    app.init();
+    var app_login = new AppLogin();
+    app_login.init();
 
 </script>
 
