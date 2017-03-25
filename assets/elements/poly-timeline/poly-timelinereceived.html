@@ -179,9 +179,6 @@
                                 if(item.estado=='en progreso' || item.estado=='cotizado'){
                                         localStorage.setItem("expense", JSON.stringify(item));
                                         chatCotizado(item);
-                                    //for (var i = 0; i < item.elementos.length; i++) {
-
-                                      //if (item.elementos[i].sender_user_id === '74lbh0nQ4X') {
                                           var id_prof = '';
                                           if(item.profesorId_homework){
                                               id_prof = item.profesorId_homework;
@@ -311,6 +308,9 @@
                            }
                            console.log(itemsArray);
                            grid.items = itemsArray;
+                           var app_ = $("#app");
+                            var paperBadg = app_[0];
+                            paperBadg.$.pbadgeEprogress.label = itemsArray.length;
                         },
                         error: function(error) {
                             console.log("Error: " + error.code + " " + error.message);

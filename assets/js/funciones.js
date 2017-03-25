@@ -70,7 +70,7 @@ function saveHomework(expense){
 function prepareSaveFile(receipt){
     var name = receipt.name;
     var file = receipt.data;
-    if(isFileImage){
+    if(isFileImage(receipt.type)){
         file = new File([receipt.data],name);
     }
     var parseFile = new Parse.File(name, file);
@@ -96,6 +96,7 @@ function sendFirstMessage (userSender, userReceiver, homework) {
          username : sessionStorage.getItem('username'),
          avatar: myavatar,
          color: mycolor,
+         who: "Estudiante",
          titlemsg: "TAREA NUEVA",
          text: '',
          timestamp: new Date().toISOString(),
@@ -134,6 +135,7 @@ function sendPaymentMessage(userSender, userReceiver,costo_, homework,Payment){
             username : sessionStorage.getItem('username'),
             avatar: myavatar,
             color: mycolor,
+            who: "Estudiante",
             titlemsg: "TAREA ACEPTADA",
             text: '',
             timestamp: new Date().toISOString(),
@@ -248,6 +250,10 @@ function chatCotizado(item){
         comboboxProf.items = elements;
         comboboxProf.value = item.elementos[0];
 
+        if(!comboboxProf.selectedItem){
+            comboboxProf.selectedItem = item.elementos[0];
+        }
+
         comboboxProf.addEventListener('selected-item-changed', function() {
             chatCambioProfesor(item);
         });
@@ -257,6 +263,9 @@ function chatCotizado(item){
 function chatCambioProfesor(item){
     //alert('cambio de profesor');
     var comboboxProf = document.querySelector('#elementsBoxProfesor');
+    if(!comboboxProf.selectedItem){
+        comboboxProf.selectedItem = item.elementos[0];
+    }
     var id_prof = comboboxProf.selectedItem.sender_user_id;
     var channel =
         item._id + '-' +
@@ -267,6 +276,10 @@ function chatCambioProfesor(item){
 }
 
 function sendPay_(){
+    var localObj = JSON.parse(localStorage.getItem("expense"));
+    var comboboxProf = document.querySelector('#elementsBoxProfesor');
+    localObj.professor = comboboxProf.selectedItem.professor;
+    localStorage.setItem("expense", JSON.stringify(localObj));
     page('/pay');
 }
 
@@ -348,4 +361,92 @@ function StringSet() {
         }
         return values;
     };
+}
+
+function manejarDivCotizacionChat(context){
+    if(context.meta.attachment){
+        context.$.imagenId.hidden = false;
+        context.$.fileLink.hidden = false;
+    }
+    if(context.meta.costo){//solo existe si se cotiza
+        context.$.costo.hidden=false;
+    }
+    if(context.meta.homework_user){//no hay homework_user cuando se cotiza
+        context.$.homework_user.hidden=false;
+    }
+    
+    if(context.meta.codeTransaction){//solo cuando el alumno paga
+        context.$.codeTransfer.hidden=false;
+    }
+    //Para mostrar solo la imagen o link del archivo si es que se envia archivos adjuntos en el chat
+    if(!context.meta.title){
+        context.$.contentImportanteCotizacion.hidden=true;
+    }
+    if(context.meta.title){
+        context.$.contentImportanteCotizacion.hidden=false;
+    }
+}
+
+function saveFileChat(file,idHomework,channel,context){
+    var fileObj = new Object();
+    fileObj.name =file.name;
+    fileObj.type=file.type;
+    fileObj.data =file;
+
+    context.$.inputnormal.disabled = true;
+    context.$.inputnormal.enable=false; 
+    context.$.inputnormal.label = "Esperando en subir archivo...";
+
+    var parseFile = prepareSaveFile(fileObj);
+
+    var HomeworkClass = Parse.Object.extend("Homework");
+    var homework = new HomeworkClass();
+    homework.id = idHomework;
+    
+    var FileChatClass = Parse.Object.extend("FileChatHomework");
+    var filechatObj = new FileChatClass();
+    filechatObj.set("attachment", parseFile);
+    filechatObj.set("idHomework",homework);
+
+    filechatObj.save(null, {
+        success: function(filechatObj) {
+            sendMsgFileChat(filechatObj.get('attachment')._url,channel,context);
+        },
+        error: function(filechatObj, error) {
+            console.log("Error: " + error.code + " " + error.message);
+        }
+    });
+
+}
+
+function sendMsgFileChat(myurl,mychannel,context){
+    var pubnub = new PubNub({ publishKey : 'pub-c-467437f5-5346-4f8c-9ddf-2de1c90a93c8', subscribeKey : 'sub-c-52679430-efef-11e6-b753-0619f8945a4f' });
+   var mycolor = 'moss';
+   var mycat = 'estudiante';
+   var   myuuid = mycolor + '-' + mycat;
+   var    myavatar = 'images/' + mycat + '.jpg';
+    var myAttachment = new Object();
+    myAttachment.url = myurl;
+
+    var metaObj = {
+        attachment: myAttachment
+    };
+
+    pubnub.publish(  {
+        message: {
+            uuid: myuuid,
+            username : sessionStorage.getItem('username'),
+            avatar: myavatar,
+            color: mycolor,
+            who: "Estudiante",
+            text: '',
+            timestamp: new Date().toISOString(),
+            meta:   metaObj
+        },
+        channel:  mychannel
+    });
+
+    context.$.inputnormal.disabled = false;
+    context.$.inputnormal.enable=true; 
+    context.$.inputnormal.label = "Type message...";
 }

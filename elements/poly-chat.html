@@ -1,5 +1,29 @@
+    <style>
+      label.filebutton {
+          width:40px;
+          height:40px;
+          overflow:hidden;
+          position:relative;
+          background-color:#ccc;
+          border-radius: 20px;
+      }
 
-
+      label span input {
+          z-index: 999;
+          line-height: 0;
+          font-size: 50px;
+          position: absolute;
+          top: -2px;
+          left: -700px;
+          opacity: 0;
+          filter: alpha(opacity = 0);
+          -ms-filter: "alpha(opacity=0)";
+          cursor: pointer;
+          _cursor: hand;
+          margin: 0;
+          padding:0;
+      }
+    </style>
 <dom-module id="poly-chat">
 
 
@@ -14,7 +38,12 @@
           <div class="shim"></div>
 
           <div class="send-message layout horizontal" id="message_normal" hidden=false>
-            <paper-input class="flex" label="Type message..." id="input" value="{{input}}" on-keyup="checkKey"></paper-input>
+            <paper-input class="flex" label="Type message..." id="inputnormal" value="{{inputnormal}}" on-keyup="checkKey"></paper-input>
+            
+            <label class="filebutton"><!-- Boton para subir archivos -->
+              <paper-icon-button icon="editor:attach-file" title="adjuntar archivo"></paper-icon-button>
+              <span><vaadin-upload id="uploadFiles" max-files="1" on-upload-before="_handleUploadChat"></vaadin-upload></span>
+            </label>
             <paper-fab icon="send" id="sendButton" on-tap="sendMyMessage"></paper-fab>
           </div>
 
@@ -64,6 +93,14 @@
         },
         sendPay: function(){
           sendPay_();
+        },
+        _handleUploadChat: function(e) {
+            var file = e.detail.file;
+            var localObj = JSON.parse(localStorage.getItem("expense"));
+            var channel = JSON.parse(localStorage.getItem("channel"));
+            saveFileChat(file,localObj._id,channel,this);//id homework
+            this.$.uploadFiles.files = [];
+            e.preventDefault();
         },
         updateChannel : function (newChannel) {
               this.channel = newChannel;
@@ -124,6 +161,7 @@
 
               // this.updateChannel (this.channel);
               this.expense = JSON.parse(localStorage.getItem("expense"));
+
           },
           randomColor : function() {
             var colors = [  'moss' ];
@@ -243,7 +281,7 @@
         },
 
         publish : function() {
-          if(!this.template.input)
+          if(!this.template.inputnormal)
             return;
 
 
@@ -253,12 +291,13 @@
                  username: sessionStorage.getItem('username'),
                 avatar: this.avatar,
                 color: this.color,
-                text: this.template.input,
+                who: "Estudiante",
+                text: this.template.inputnormal,
                 timestamp: new Date().toISOString()
             },
             channel: this.channel
           });
-          this.template.input = '';
+          this.template.inputnormal = '';
         },
 
         error : function(e) {

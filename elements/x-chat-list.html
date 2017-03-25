@@ -130,6 +130,7 @@ A single user list with a username, avatar, and desc.
 			<div class="text">{{text}}</div>
 			<div id="cotizacion" hidden = true >
 					<ul>
+					<div id="contentImportanteCotizacion">
 					<strong>{{titlemsg}}</strong> <br><br>
 					<iron-icon icon="icons:book"></iron-icon> {{meta.title}} <br>
 					<iron-icon icon="icons:date-range"></iron-icon> {{meta.deadline}}  <br>
@@ -137,12 +138,11 @@ A single user list with a username, avatar, and desc.
 					 <iron-icon icon="icons:description"></iron-icon> {{meta.description}}  <br>
 					 <div id="costo" hidden=true><iron-icon icon="editor:attach-money"></iron-icon> {{meta.costo}}  <br></div>
 					 <div id="codeTransfer" hidden=true><iron-icon icon="icons:credit-card"></iron-icon> {{meta.codeTransaction}}  <br></div>
-					 
+					 </div>
 					 <div id="fileLink" hidden = true><iron-icon icon="icons:cloud-download"></iron-icon><a href="{{meta.attachment.url}}" target="_blank"> Archivo adjunto</a></div>
 					 <img class = "imagen" id="imagenId" border="0" alt="image" src="{{meta.attachment.url}}"  onerror='onerrorImg(this);' width="100" height="100" hidden = true/>
  					</ul>
 			</div>	 
-			{{expense.estado}}
 		</div>
 		<time class="timestamp" is="relative-time" datetime$="{{timestamp}}"></time>
 	</section>
@@ -172,23 +172,9 @@ Polymer({
 		if (newvalue) {
 
 			this.meta = newvalue;
-			var e = $('#cotizacion');
 			this.$.cotizacion.hidden = false;
 
-			if(this.meta.attachment){
-				this.$.imagenId.hidden = false;
-				this.$.fileLink.hidden = false;
-			}
-			if(this.meta.costo){//solo existe si se cotiza
-				this.$.costo.hidden=false;
-			}
-			if(this.meta.homework_user){//no hay homework_user cuando se cotiza
-				this.$.homework_user.hidden=false;
-			}
-			
-			if(this.meta.codeTransaction){//solo cuando el alumno paga
-				this.$.codeTransfer.hidden=false;
-			}
+			manejarDivCotizacionChat(this);
 		}
 	},
   	_backgroundImage: function(avatar) {

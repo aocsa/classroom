@@ -176,8 +176,6 @@
                                 if(item.estado=="nuevo"){
                                     page('/editorhome');
                                 }
-                                //}else{
-                                //}
                             }.bind(this));
                         }
                     }.bind(this));
@@ -261,11 +259,12 @@
                                         descripcion: object.get('description'),
                                         _attachments: {receipt: object.get('attachment')} });
                                 }
-                                //console.log(object.id + ' - ' + object.get('Date'));
-                                //this.expenses.addRow(object.get('Date'),object.get('Merchant'),object.get('Comment'),object.get('Total'),'status',object.get('Comment'));
                             }
                             grid.items = itemsArray;
                             //console.log(itemsArray);
+                            var app_ = $("#app");
+                            var paperBadg = app_[0];
+                            paperBadg.$.pbadgeMtareas.label = itemsArray.length;
                         },
                         error: function(error) {
                             console.log("Error: " + error.code + " " + error.message);

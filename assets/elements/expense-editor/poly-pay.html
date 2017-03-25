@@ -171,7 +171,7 @@
                     <form is="iron-form" id="form">
                         <iron-a11y-keys keys="enter" on-keys-pressed="_save"></iron-a11y-keys>
                         
-                        <vaadin-combo-box class="elements-box" id = "elements-box" label="Profesor" item-label-path="professor"
+                        <vaadin-combo-box class="elements-box" id = "elements-box" label="Profesor" item-label-path="professor" readonly
                         ></vaadin-combo-box>
                         <p>Total: $<span id="element-name"></span>.</p>
                         
@@ -393,7 +393,19 @@
 
                     // elementsJson is an Array of Objects. Item object format:
                     //   {name: 'Hydrogen', symbol: 'H', number: 1}
+                    //buscamos el profesor seleccionado
+                    var pos =0;
+                    for(var i=0;i<expense.elementos.length;i++){
+                        if(expense.elementos[i].professor==expense.professor){
+                            pos = i;
+                        }
+                    }
                     combobox.items = expense.elementos;
+
+                    if(!combobox.selectedItem){
+                        combobox.selectedItem = expense.elementos[pos];
+                        document.querySelector('#element-name').innerHTML = expense.elementos[pos].total;
+                    }
 
 
                     combobox.addEventListener('selected-item-changed', function() {
