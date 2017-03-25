@@ -299,12 +299,77 @@ function onerrorImg(source){
     source.hidden = true;
 }
 
-function sendMessageChangeInput(expense,contexto){
-    if(expense.estado=='cotizado'){//tiene que enviar pago
+function verificarMensajePay(message,context,listMsg){
+    if(message.meta){
+        if(message.meta.title){
+            if(message.meta.codeTransaction){//llegada del mensaje de pago
+                sendMessageChangeInput('en progreso',context);
+                return true;
+            }
+            else{
+                if(message.meta.costo){//La tarea a sido cotizada
+                    //sendMessageChangeInput('cotizado',context);
+                    habilitarChat(listMsg,context,3);
+                }else{//es una tarea nueva
+                    sendMessageChangeInput('nuevo',context);
+                }
+                return false;
+            }
+        }return false;
+    }return false;
+}
+
+function verificarTareaNoCotizada(listMsg,context,estado){
+    var tam = listMsg.length;//solo verificamos el ultimo mensaje
+    if(tam>0){
+        var msg = listMsg[tam-1];
+        if(verificarMensajePay(listMsg[tam-1],context,listMsg)){
+            return;
+        }
+        //if(listMsg[tam-1].meta){
+            if(estado!='en progreso'/* && listMsg[tam-1].meta.costo*/){
+                habilitarChat(listMsg,context,3);
+            }
+        //}
+        
+    }
+}
+
+//habilitamos el chat para que pueda conversar un numero determinado de veces antes de que la tarea pase a en progreso
+function habilitarChat(listMsg,context,num){
+    var tam = listMsg.length;//solo verificamos el ultimo mensaje
+    if(tam>0){
+        var contador = 0;
+        if(tam==2){
+            sendMessageChangeInput('en progreso',context);
+            context.$.inputnormal.label = "Solo tienes 3 mensajes para enviar ...";
+            return;
+        }
+    
+       for(var i=0;i<tam;i++){//+1 por que el mensaje de cotizado no cuenta
+           
+           if(listMsg[i].who=="Estudiante"){
+               contador++;
+           }
+       }
+       if(contador<num +1){
+            sendMessageChangeInput('en progreso',context);
+            context.$.inputnormal.label = "Solo tienes 3 mensajes para enviar ...";
+            return;
+        }
+        if(contador>=num +1){// solo sucede cuando ya envio nuva cotizacion
+            sendMessageChangeInput('cotizado',context);
+            return;
+        }
+    }
+}
+
+function sendMessageChangeInput(estado,contexto){
+    if(estado=='cotizado'){//tiene que enviar pago
        contexto.$.message_normal.hidden = true;
        contexto.$.message_pay.hidden = false;           
     }
-    if(expense.estado=='en progreso'){//Puede hablar libremente
+    if(estado=='en progreso'){//Puede hablar libremente
         contexto.$.message_normal.hidden = false;
         contexto.$.message_pay.hidden = true;
     }
@@ -449,4 +514,21 @@ function sendMsgFileChat(myurl,mychannel,context){
     context.$.inputnormal.disabled = false;
     context.$.inputnormal.enable=true; 
     context.$.inputnormal.label = "Type message...";
+}
+
+function verificarFechaTareas(expense){
+    var dateCurrent = new Date();
+    //console.log(dateCurrent.getDate() + "/" + (dateCurrent.getMonth() +1) + "/" + dateCurrent.getFullYear());
+    var parts =expense.get('deadline').split('-');
+    var mydate = new Date(parts[0],parts[1]-1,parts[2]);
+    //console.log(mydate.getDate() + "/" + (mydate.getMonth() +1) + "/" + mydate.getFullYear());
+
+    if(mydate<dateCurrent){
+        console.log("finalizo! " + expense.get('title'));
+        var HomeworkClass = Parse.Object.extend("Homework");
+        var homework = new HomeworkClass();
+        homework.id = expense.id;
+        homework.set('status','finalizado');
+        homework.save();
+    }
 }

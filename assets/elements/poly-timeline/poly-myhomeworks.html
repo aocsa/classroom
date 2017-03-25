@@ -173,7 +173,7 @@
                             grid.getItem(selection[0], function(err, item) {
                                 //this.fire('edit-expense', item);
                                 localStorage.setItem("expense", JSON.stringify(item));
-                                if(item.estado=="nuevo"){
+                                if(item.estado=="nuevo"/* || item.estado=="finalizado"*/){
                                     page('/editorhome');
                                 }
                             }.bind(this));
@@ -250,6 +250,7 @@
                             // Do something with the returned Parse.Object values
                             for (var i = 0; i < results.length; i++) {
                                 var object = results[i];
+                                verificarFechaTareas(object);
                                 //itemsArray.push({_id:object.id, date: object.get('Date'), merchant: object.get('Merchant'), total: object.get('Total'), status: 'New', comment: object.get('Comment')});
                                 if(object.get('status')!='en progreso' && object.get('status')!='cotizado'){
                                     itemsArray.push({_id:object.id,
@@ -258,6 +259,7 @@
                                         estado: object.get('status'),
                                         descripcion: object.get('description'),
                                         _attachments: {receipt: object.get('attachment')} });
+                                    
                                 }
                             }
                             grid.items = itemsArray;

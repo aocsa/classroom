@@ -88,7 +88,7 @@
         expensefunction : function (expenseValue) {
           if(expenseValue){
               this.expense = expenseValue;
-              sendMessageChangeInput(expenseValue,this);
+              sendMessageChangeInput(expenseValue.estado,this);
           }
         },
         sendPay: function(){
@@ -132,6 +132,7 @@
                          if(response && response.messages.length > 0) {
                             polymerObj.pastMsgs = polymerObj.getListWithOnlineStatus(response.messages);
                             polymerObj.displayChatList(polymerObj.pastMsgs);
+                            verificarTareaNoCotizada(polymerObj.pastMsgs,polymerObj,polymerObj.expense.estado);
                         }
                   }
               );
@@ -239,6 +240,7 @@
           if(o.message) {
                console.log(o.message);
               this.displayChatList(this.template.messageList.concat(this.getListWithOnlineStatus( [o.message] )));
+              verificarTareaNoCotizada(this.template.messageList,this,this.expense.estado);
           }
         },
 
