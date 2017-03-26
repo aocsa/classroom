@@ -67,6 +67,30 @@ function saveHomework(expense){
     });
 }
 
+function sendEmail(){
+    var localObj = JSON.parse(localStorage.getItem("expense"));
+    var parametros = {
+            "email_" : "valorCaja1",//del profesor
+            "username_" : "valorCaja2",//del profesor
+            "asunto": "Tienes una tarea  nueva!!",
+            "title": localObj.title,
+            "deadline": localObj.deadline,
+            "descripcion": localObj.description,
+    };
+    $.ajax({
+            data:  parametros,
+            url:   'phpmailer/ejemplo_ajax_proceso.php',
+            type:  'post',
+            beforeSend: function () {
+                    //$("#resultado").html("Procesando, espere por favor...");
+            },
+            success:  function (response) {
+                    //$("#resultado").html(response);
+                    alert(response);
+            }
+    });
+}
+
 function prepareSaveFile(receipt){
     var name = receipt.name;
     var file = receipt.data;
@@ -168,6 +192,9 @@ function saveTableMessage(userSender,userReceiver,cost,PointHomework,PointPaymen
                     if(PointPayment=='null'){//funcion saveHomework
                         dialog.close();
                         page('/');
+
+                        sendEmail();
+
                         pubnub.publish({
                             channel: 'chatChannel',//channel: PointHomework.id + '-' + userReceiver.id
                             message: { foo : 'update-list',sender: userSender.id , school: userReceiver.get("school")}
